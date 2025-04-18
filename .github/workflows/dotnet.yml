@@ -6,11 +6,13 @@ on:
     paths:
       - '*.csproj'
       - '*.cs'
+      - '*.slnx'
   pull_request:
     branches: [ "main" ]
     paths:
       - '*.csproj'
       - '*.cs'
+      - '*.slnx'
 
 jobs:
   build:

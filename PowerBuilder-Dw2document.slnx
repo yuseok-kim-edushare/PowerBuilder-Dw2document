@@ -1,0 +1,15 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/yuseok.kim.dw2docs.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/yuseok.kim.dw2docs.test.csproj" />
+  </Folder>
+  <Folder Name="/.github/">
+  </Folder>
+</Solution>

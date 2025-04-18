@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net8.0-windows;net481;net6.0-windows</TargetFrameworks>
+        <IsTestProject>true</IsTestProject>
+        <AssemblyName>yuseok.kim.dw2docs.test</AssemblyName>
+        <Authors>yuseok.kim</Authors>
+        <Description>Powerbuilder Datawindow to Document Converter</Description>
+        <Name>yuseok.kim.dw2docs.test</Name>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\src\yuseok.kim.dw2docs.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+        <PackageReference Include="MSTest.TestAdapter" Version="3.8.3" />
+        <PackageReference Include="MSTest.TestFramework" Version="3.8.3" />
+    </ItemGroup>
+
+</Project>

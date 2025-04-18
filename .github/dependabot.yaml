@@ -1,7 +1,17 @@
 version: 2
 updates:
   - package-ecosystem: "nuget"
-    directory: "/"
+    directory: "/src"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "nuget"
+  - package-ecosystem: "nuget"
+    directory: "/test"
     schedule:
       interval: "weekly"
       day: "monday"

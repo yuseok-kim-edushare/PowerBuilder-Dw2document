@@ -1,0 +1,32 @@
+name: .NET ci
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - '*.csproj'
+      - '*.cs'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '*.csproj'
+      - '*.cs'
+
+jobs:
+  build:
+
+    runs-on: windows-2022
+
+    steps:
+    - uses: actions/checkout@v4
+        
+    - name: Build
+      run: |
+        dotnet restore
+        dotnet publish --configuration Release -r windows -f net8.0-windows
+        dotnet publish --configuration Release -r windows -f net481
+        dotnet publish --configuration Release -r windows -f net6.0-windows
+      
+    - name: Test
+      run: |
+        dotnet test --verbosity normal

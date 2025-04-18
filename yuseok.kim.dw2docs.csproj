@@ -1,0 +1,161 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0-windows,net481,net6.0-windows</TargetFramework>
+        <OutputType>Library</OutputType>
+        <AssemblyName>yuseok.kim.dw2docs</AssemblyName>
+        <Version>0.0.1</Version>
+        <FileVersion>0.0.1</FileVersion>
+        <PackageId>yuseok.kim.dw2docs</PackageId>
+        <Authors>yuseok.kim</Authors>
+        <Description>Powerbuilder Datawindow to Document Converter</Description>
+        <PackageTags>Powerbuilder, Datawindow, Document, Converter</PackageTags>
+        <PackageLicenseUrl>https://github.com/yuseok-kim/PowerBuilder-Dw2document/blob/main/LICENSE</PackageLicenseUrl>
+        <PackageProjectUrl>https://github.com/yuseok-kim/PowerBuilder-Dw2document</PackageProjectUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTargetFramework>$(TargetFramework)</PackageTargetFramework>
+        <PackageVersion>$(Version)</PackageVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <!-- for dynamic loading in interop case like powerbuilder -->
+        <EnableDynamicLoading>true</EnableDynamicLoading>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="NPOI" Version="2.7.3" />
+        <PackageReference Include="ILRepack" Version="2.0.41">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Polysharp" Version="1.15.0">
+            <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net481'">
+        <PackageReference Include="System.Text.Json" Version="9.0.4" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)'!='net6.0-windows'">
+        <PackageReference Include="System.Drawing.Common" Version="9.0.4" />
+    </ItemGroup>
+    <!-- Cause of net6.0-windows, System.Drawing.Common 9+ is not available so fix to 8.0.* -->
+    <ItemGroup Condition="'$(TargetFramework)'=='net6.0-windows'">
+        <PackageReference Include="System.Drawing.Common" Version="[8.0.15,9.0.0)" />
+    </ItemGroup>
+</Project>
+
+<!-- refer preparing ilrepack
+<ItemGroup Condition="'$(TargetFramework)'=='net6.0-windows'">
+    <MergeAssemblies Include="$(OutputPath)\publish\$(AssemblyName).dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Appeon.DotnetDemo.Dw2Doc.Common.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\BouncyCastle.Cryptography.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Enums.Net.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\ExtendedNumerics.BigDecimal.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\ICSharpCode.SharpZipLib.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\MathNet.Numerics.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.IO.RecyclableMemoryStream.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.Core.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXml4Net.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXmlFormats.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.Fonts.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.ImageSharp.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Drawing.Common.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Formats.Asn1.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Pkcs.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Xml.dll" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net8.0-windows'">
+    <MergeAssemblies Include="$(OutputPath)\publish\$(AssemblyName).dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Appeon.DotnetDemo.Dw2Doc.Common.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\BouncyCastle.Cryptography.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Enums.Net.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\ExtendedNumerics.BigDecimal.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\ICSharpCode.SharpZipLib.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\MathNet.Numerics.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.IO.RecyclableMemoryStream.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.Core.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXml4Net.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXmlFormats.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.Fonts.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.ImageSharp.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Drawing.Common.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Pkcs.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Xml.dll" />
+  </ItemGroup>
+
+  <!-- Define merge inputs for net481 build (Build Artifacts .net481) -->
+  <ItemGroup Condition="'$(TargetFramework)'=='net481'">
+    <MergeAssemblies Include="$(OutputPath)\publish\$(AssemblyName).dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Appeon.DotnetDemo.Dw2Doc.Common.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\BouncyCastle.Cryptography.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Enums.Net.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\ExtendedNumerics.BigDecimal.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\ICSharpCode.SharpZipLib.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\MathNet.Numerics.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Bcl.AsyncInterfaces.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Bcl.HashCode.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.IO.RecyclableMemoryStream.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.Core.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXml4Net.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXmlFormats.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.Fonts.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.ImageSharp.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Buffers.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Drawing.Common.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.IO.Pipelines.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Memory.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Numerics.Vectors.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Runtime.CompilerServices.Unsafe.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Pkcs.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Xml.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Text.Encoding.CodePages.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Text.Encodings.Web.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Text.Json.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Threading.Tasks.Extensions.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.ValueTuple.dll" />
+  </ItemGroup>
+
+  <Target Name="CreateILRepackCommand" BeforeTargets="ILRepack">
+    <PropertyGroup>
+      <ILRepackArgs>/internalize /lib:"$(OutputPath)publish"</ILRepackArgs>
+      <ILRepackArgs Condition="'$(TargetFramework)'=='net481'">$(ILRepackArgs) /targetplatform:"v4,C:\Windows\Microsoft.NET\Framework\v4.0.30319"</ILRepackArgs>
+      <ILRepackArgs>$(ILRepackArgs) /union /copyattrs</ILRepackArgs>
+      <ILRepackArgs>$(ILRepackArgs) /out:"$(SolutionDir)bin\$(TargetFramework)\$(AssemblyName).dll"</ILRepackArgs>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="ILRepack"  AfterTargets="Publish" DependsOnTargets="CreateILRepackCommand">
+    <ItemGroup>
+      <ILRepackExe Include="$(NuGetPackageRoot)\ilrepack\2.0.41\tools\ILRepack.exe" />
+    </ItemGroup>
+    <MakeDir Directories="$(SolutionDir)tools" />
+    <Copy SourceFiles="@(ILRepackExe)" DestinationFolder="$(SolutionDir)tools" SkipUnchangedFiles="true" />
+    <Message Text="Copying ILRepack.exe to $(SolutionDir)tools" Importance="high"/>
+    <WriteLinesToFile
+      File="$(ProjectDir)ilrepack.log"
+      Lines=""
+      Overwrite="true" />
+    <Message Text="Cleared ilrepack.log" Importance="high"/>
+    <Exec Command="&quot;$(SolutionDir)tools\ILRepack.exe&quot; $(ILRepackArgs) @(MergeAssemblies->'&quot;%(FullPath)&quot;', ' ') > &quot;$(ProjectDir)ilrepack.log&quot; 2>&amp;1" 
+          IgnoreExitCode="true"/>
+    <Message Text="ILRepack.exe executed $(AssemblyName).dll" Importance="high"/>
+    <ReadLinesFromFile File="$(ProjectDir)ilrepack.log">
+      <Output TaskParameter="Lines" ItemName="ILRepackLogLines"/>
+    </ReadLinesFromFile>
+    <ItemGroup>
+      <ILRepackErrorLines Include="@(ILRepackLogLines)"
+        Condition="$([System.String]::Copy('%(ILRepackLogLines.Identity)').ToLower().Contains('error'))"/>
+      <ILRepackErrorLines Include="@(ILRepackLogLines)"
+        Condition="$([System.String]::Copy('%(ILRepackLogLines.Identity)').ToLower().Contains('input file not found'))"/>
+    </ItemGroup>
+    <Error Text="ILRepack error: %(ILRepackErrorLines.Identity)" Condition="@(ILRepackErrorLines->Count()) &gt; 0" />
+    <Message Text="ILRepack Log: %(ILRepackLogLines.Identity)" Importance="high"/>
+
+  </Target>
+
+-->

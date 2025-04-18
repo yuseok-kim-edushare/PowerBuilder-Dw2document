@@ -1,20 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0-windows,net481,net6.0-windows</TargetFramework>
+        <TargetFrameworks>net8.0-windows;net481;net6.0-windows</TargetFrameworks>
         <OutputType>Library</OutputType>
         <AssemblyName>yuseok.kim.dw2docs</AssemblyName>
         <Version>0.0.1</Version>
         <FileVersion>0.0.1</FileVersion>
-        <PackageId>yuseok.kim.dw2docs</PackageId>
         <Authors>yuseok.kim</Authors>
         <Description>Powerbuilder Datawindow to Document Converter</Description>
         <PackageTags>Powerbuilder, Datawindow, Document, Converter</PackageTags>
         <PackageLicenseUrl>https://github.com/yuseok-kim/PowerBuilder-Dw2document/blob/main/LICENSE</PackageLicenseUrl>
         <PackageProjectUrl>https://github.com/yuseok-kim/PowerBuilder-Dw2document</PackageProjectUrl>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageTargetFramework>$(TargetFramework)</PackageTargetFramework>
-        <PackageVersion>$(Version)</PackageVersion>
+        <Name>yuseok.kim.dw2docs</Name>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <!-- for dynamic loading in interop case like powerbuilder -->
@@ -86,8 +84,8 @@
     <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Pkcs.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Xml.dll" />
   </ItemGroup>
-
-  <!-- Define merge inputs for net481 build (Build Artifacts .net481) -->
+-->
+  <!-- Define merge inputs for net481 build (Build Artifacts .net481) 
   <ItemGroup Condition="'$(TargetFramework)'=='net481'">
     <MergeAssemblies Include="$(OutputPath)\publish\$(AssemblyName).dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Appeon.DotnetDemo.Dw2Doc.Common.dll" />

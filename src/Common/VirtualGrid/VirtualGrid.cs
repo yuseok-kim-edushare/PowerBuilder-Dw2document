@@ -16,6 +16,11 @@ namespace yuseok.kim.dw2docs.Common.VirtualGrid
         // Missing field that TestVirtualGrid.SetAttributes tries to access
         private Dictionary<string, DwObjectAttributesBase> _controlAttributes;
 
+        /// <summary>
+        /// Public accessor for control attributes.
+        /// </summary>
+        public IReadOnlyDictionary<string, DwObjectAttributesBase> ControlAttributes => _controlAttributes;
+
         internal VirtualGrid(
             IList<RowDefinition> rows,
             IList<ColumnDefinition> columns,
@@ -30,12 +35,6 @@ namespace yuseok.kim.dw2docs.Common.VirtualGrid
             CellRepository = cellRepository;
             this.DwType = DwType;
             _controlAttributes = new Dictionary<string, DwObjectAttributesBase>();
-        }
-
-        // Add a method to get the control attributes for renderers to use
-        internal Dictionary<string, DwObjectAttributesBase> GetControlAttributes()
-        {
-            return _controlAttributes;
         }
 
         // Add a setter method for reflection to use

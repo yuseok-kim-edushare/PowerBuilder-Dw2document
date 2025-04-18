@@ -4,7 +4,7 @@ using yuseok.kim.dw2docs.Common.Exceptions;
 using yuseok.kim.dw2docs.Common.Extensions;
 using System.Drawing;
 
-    namespace Appeon.DotnetDemo.Dw2Doc.Common.VirtualGrid
+namespace yuseok.kim.dw2docs.Common.VirtualGrid
 {
     public class VirtualGridBuilder
     {

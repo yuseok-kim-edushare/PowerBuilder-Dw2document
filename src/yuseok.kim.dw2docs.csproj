@@ -51,7 +51,7 @@
     <MergeAssemblies Include="$(OutputPath)\publish\MathNet.Numerics.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.IO.RecyclableMemoryStream.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.Core.dll" />
-    <Merge Assemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXml4Net.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXmlFormats.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.Fonts.dll" />
@@ -71,7 +71,7 @@
     <MergeAssemblies Include="$(OutputPath)\publish\MathNet.Numerics.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.IO.RecyclableMemoryStream.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.Core.dll" />
-    <Merge Assemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXml4Net.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXmlFormats.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.Fonts.dll" />

@@ -244,18 +244,8 @@ namespace yuseok.kim.dw2docs.Common.VirtualGridWriter.Abstractions
             
             try
             {
-                // Get the control attributes via reflection
-                var controlAttributesField = typeof(VirtualGrid.VirtualGrid).GetField("_controlAttributes", 
-                    System.Reflection.BindingFlags.NonPublic | 
-                    System.Reflection.BindingFlags.Instance);
-                
-                if (controlAttributesField == null)
-                {
-                    error = "Could not find _controlAttributes field in VirtualGrid";
-                    return false;
-                }
-                
-                var controlAttributes = controlAttributesField.GetValue(VirtualGrid) as Dictionary<string, DwObjectAttributesBase>;
+                // Get the control attributes directly using the public property
+                var controlAttributes = VirtualGrid.ControlAttributes;
                 
                 if (controlAttributes == null || controlAttributes.Count == 0)
                 {

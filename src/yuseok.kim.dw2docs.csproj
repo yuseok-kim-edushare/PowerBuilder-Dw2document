@@ -41,12 +41,9 @@
     <ItemGroup Condition="'$(TargetFramework)'=='net6.0-windows'">
         <PackageReference Include="System.Drawing.Common" Version="[8.0.15,9.0.0)" />
     </ItemGroup>
-</Project>
 
-<!-- refer preparing ilrepack
-<ItemGroup Condition="'$(TargetFramework)'=='net6.0-windows'">
-    <MergeAssemblies Include="$(OutputPath)\publish\$(AssemblyName).dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\Appeon.DotnetDemo.Dw2Doc.Common.dll" />
+  <ItemGroup Condition="'$(TargetFramework)'=='net6.0-windows'">
+    <MergeAssemblies Include="$(OutputPath)\publish\$(AssemblyName).dll" /> <!-- The main merged DLL -->
     <MergeAssemblies Include="$(OutputPath)\publish\BouncyCastle.Cryptography.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Enums.Net.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\ExtendedNumerics.BigDecimal.dll" />
@@ -54,7 +51,7 @@
     <MergeAssemblies Include="$(OutputPath)\publish\MathNet.Numerics.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.IO.RecyclableMemoryStream.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.Core.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
+    <Merge Assemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXml4Net.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXmlFormats.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.Fonts.dll" />
@@ -66,8 +63,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net8.0-windows'">
-    <MergeAssemblies Include="$(OutputPath)\publish\$(AssemblyName).dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\Appeon.DotnetDemo.Dw2Doc.Common.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\$(AssemblyName).dll" /> <!-- The main merged DLL -->
     <MergeAssemblies Include="$(OutputPath)\publish\BouncyCastle.Cryptography.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Enums.Net.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\ExtendedNumerics.BigDecimal.dll" />
@@ -75,7 +71,7 @@
     <MergeAssemblies Include="$(OutputPath)\publish\MathNet.Numerics.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.IO.RecyclableMemoryStream.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.Core.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
+    <Merge Assemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXml4Net.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXmlFormats.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.Fonts.dll" />
@@ -84,11 +80,9 @@
     <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Pkcs.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Xml.dll" />
   </ItemGroup>
--->
-  <!-- Define merge inputs for net481 build (Build Artifacts .net481) 
+
   <ItemGroup Condition="'$(TargetFramework)'=='net481'">
-    <MergeAssemblies Include="$(OutputPath)\publish\$(AssemblyName).dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\Appeon.DotnetDemo.Dw2Doc.Common.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\$(AssemblyName).dll" /> <!-- The main merged DLL -->
     <MergeAssemblies Include="$(OutputPath)\publish\BouncyCastle.Cryptography.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Enums.Net.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\ExtendedNumerics.BigDecimal.dll" />
@@ -118,16 +112,19 @@
     <MergeAssemblies Include="$(OutputPath)\publish\System.ValueTuple.dll" />
   </ItemGroup>
 
+  <!-- Adapted ILRepack Targets -->
   <Target Name="CreateILRepackCommand" BeforeTargets="ILRepack">
     <PropertyGroup>
       <ILRepackArgs>/internalize /lib:"$(OutputPath)publish"</ILRepackArgs>
       <ILRepackArgs Condition="'$(TargetFramework)'=='net481'">$(ILRepackArgs) /targetplatform:"v4,C:\Windows\Microsoft.NET\Framework\v4.0.30319"</ILRepackArgs>
       <ILRepackArgs>$(ILRepackArgs) /union /copyattrs</ILRepackArgs>
+      <!-- Output to solution bin directory -->
       <ILRepackArgs>$(ILRepackArgs) /out:"$(SolutionDir)bin\$(TargetFramework)\$(AssemblyName).dll"</ILRepackArgs>
     </PropertyGroup>
+    <Message Text="ILRepack Args: $(ILRepackArgs)" Importance="high" />
   </Target>
 
-  <Target Name="ILRepack"  AfterTargets="Publish" DependsOnTargets="CreateILRepackCommand">
+  <Target Name="ILRepack" AfterTargets="Publish" DependsOnTargets="CreateILRepackCommand">
     <ItemGroup>
       <ILRepackExe Include="$(NuGetPackageRoot)\ilrepack\2.0.41\tools\ILRepack.exe" />
     </ItemGroup>
@@ -139,7 +136,7 @@
       Lines=""
       Overwrite="true" />
     <Message Text="Cleared ilrepack.log" Importance="high"/>
-    <Exec Command="&quot;$(SolutionDir)tools\ILRepack.exe&quot; $(ILRepackArgs) @(MergeAssemblies->'&quot;%(FullPath)&quot;', ' ') > &quot;$(ProjectDir)ilrepack.log&quot; 2>&amp;1" 
+    <Exec Command="&quot;$(SolutionDir)tools\ILRepack.exe&quot; $(ILRepackArgs) @(MergeAssemblies->'&quot;%(FullPath)&quot;', ' ') > &quot;$(ProjectDir)ilrepack.log&quot; 2>&amp;1"
           IgnoreExitCode="true"/>
     <Message Text="ILRepack.exe executed $(AssemblyName).dll" Importance="high"/>
     <ReadLinesFromFile File="$(ProjectDir)ilrepack.log">
@@ -151,9 +148,8 @@
       <ILRepackErrorLines Include="@(ILRepackLogLines)"
         Condition="$([System.String]::Copy('%(ILRepackLogLines.Identity)').ToLower().Contains('input file not found'))"/>
     </ItemGroup>
-    <Error Text="ILRepack error: %(ILRepackErrorLines.Identity)" Condition="@(ILRepackErrorLines->Count()) &gt; 0" />
+    <Error Text="ILRepack error: %(ILRepackErrorLines.Identity)" Condition="@(ILRepackErrorLines->Count()) > 0" />
     <Message Text="ILRepack Log: %(ILRepackLogLines.Identity)" Importance="high"/>
-
   </Target>
 
--->
+</Project>

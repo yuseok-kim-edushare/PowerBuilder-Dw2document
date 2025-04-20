@@ -20,8 +20,7 @@
         // override object.GetHashCode
         public override int GetHashCode()
         {
-            return HashCode.Combine(IsVisible,
-                Floating);
+            return (IsVisible.GetHashCode() * 17) ^ (Floating.GetHashCode() * 23);
         }
     }
 }

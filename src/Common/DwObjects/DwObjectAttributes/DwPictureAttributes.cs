@@ -15,9 +15,10 @@
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(base.GetHashCode(),
-                FileName,
-                Transparency);
+            int hash = base.GetHashCode();
+            hash = hash * 31 + (FileName != null ? FileName.GetHashCode() : 0);
+            hash = hash * 31 + Transparency.GetHashCode();
+            return hash;
         }
     }
 }

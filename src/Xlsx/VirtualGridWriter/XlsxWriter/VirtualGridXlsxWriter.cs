@@ -12,7 +12,6 @@ using NPOI.XSSF.UserModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using System.IO;
-using Microsoft.Extensions.Logging;
 using System;
 
 namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
@@ -29,11 +28,13 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
         private readonly ISet<ColumnDefinition> _resizedColumns;
         private readonly IDictionary<string, int> _pictureCache;
         private bool _writerInitialized = false;
-        private readonly FileStream _destinationFile;
+        private FileStream? _destinationFile;
         private bool _closed = false;
         private Dictionary<string, VirtualCell?> rangedCells = new();
         private const string LogFilePath = @"C:\temp\Dw2Doc_ExcelError.log";
         private bool disposedValue; // To detect redundant calls
+        private string? _writeToPath;
+        private readonly RendererLocator _rendererLocator;
 
         private static void LogToFile(string message, Exception? ex = null)
         {
@@ -61,6 +62,8 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
             {
                 _workbook = workbook ?? throw new ArgumentNullException(nameof(workbook));
                 _destinationFile = stream ?? throw new ArgumentNullException(nameof(stream));
+                _rendererLocator = new RendererLocator();
+                RegisterRenderers();
 
                 LogToFile("Workbook and Stream received.");
 
@@ -90,6 +93,18 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                 _destinationFile?.Dispose();
                 throw;
             }
+        }
+
+        private void RegisterRenderers()
+        {
+            // Register renderers for different attribute types
+            // Example:
+            // _rendererLocator.RegisterRenderer(typeof(DwTextAttributes), new XlsxTextRenderer());
+        }
+
+        public void SetWritePath(string path)
+        {
+            _writeToPath = path;
         }
 
         private void InitWriter()
@@ -173,7 +188,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                         }
                         
                         // Call the common RendererLocator and expect ObjectRendererBase
-                        var rendererBase = RendererLocator.Find(attribute.GetType());
+                        var rendererBase = _rendererLocator.Find(attribute.GetType());
                         if (rendererBase == null)
                         {
                             Console.WriteLine($"Warning: Could not find renderer for attribute type {attribute.GetType().FullName}");
@@ -334,6 +349,14 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
         {
             error = null;
             
+            // Set the target path
+            string targetPath = sheetname ?? _writeToPath ?? string.Empty;
+            if (string.IsNullOrEmpty(targetPath))
+            {
+                error = "No file specified";
+                return false;
+            }
+
             if (_workbook == null)
             {
                 error = "Workbook is null";
@@ -433,19 +456,21 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                     if (_destinationFile != null)
                     {
                         Console.WriteLine("Closing existing file stream");
+                        _destinationFile.Flush(); // Ensure all data is written
                         _destinationFile.Close();
                         _destinationFile.Dispose();
                         _destinationFile = null;
+                        LogToFile("Destination file stream flushed, closed, and disposed.");
                     }
                     
                     // Use a completely new stream just for writing the final output
-                    Console.WriteLine($"Creating new file stream for final output: {_path}");
-                    using (var fs = new FileStream(_path, FileMode.Create, FileAccess.Write))
+                    Console.WriteLine($"Creating new file stream for final output: {targetPath}");
+                    using (var fs = new FileStream(targetPath, FileMode.Create, FileAccess.Write))
                     {
                         _workbook.Write(fs);
                         Console.WriteLine("Workbook written successfully");
                     }
-                    Console.WriteLine($"File written: {_path}");
+                    Console.WriteLine($"File written: {targetPath}");
                 }
                 catch (Exception ex)
                 {
@@ -456,15 +481,15 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                 _closed = true;
                 
                 // Verify the file was created properly
-                if (File.Exists(_path))
+                if (File.Exists(targetPath))
                 {
-                    var fileInfo = new FileInfo(_path);
+                    var fileInfo = new FileInfo(targetPath);
                     Console.WriteLine($"Created file size: {fileInfo.Length} bytes");
                     
                     // Additional verification step - try to open the file to ensure it's valid
                     try
                     {
-                        using var testStream = new FileStream(_path, FileMode.Open, FileAccess.Read);
+                        using var testStream = new FileStream(targetPath, FileMode.Open, FileAccess.Read);
                         using var testWorkbook = new XSSFWorkbook(testStream);
                         Console.WriteLine($"Verification: File contains {testWorkbook.NumberOfSheets} sheet(s)");
                     }
@@ -603,7 +628,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
             }
         }
 
-        public void Dispose() 
+        public new void Dispose() 
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(true);

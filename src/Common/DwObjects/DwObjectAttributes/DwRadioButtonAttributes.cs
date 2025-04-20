@@ -20,21 +20,23 @@ public class DwRadioButtonAttributes : DwTextAttributes
     // override object.GetHashCode
     public override int GetHashCode()
     {
-        var hashCode = HashCode.Combine(Columns, LeftText);
+        int hash = 17;
+        hash = hash * 31 + Columns.GetHashCode();
+        hash = hash * 31 + LeftText.GetHashCode();
         
         if (CodeTable != null)
         {
             foreach (var key in CodeTable.Keys)
             {
-                hashCode = HashCode.Combine(hashCode, key);
+                hash = hash * 31 + (key != null ? key.GetHashCode() : 0);
             }
             
             foreach (var value in CodeTable.Values)
             {
-                hashCode = HashCode.Combine(hashCode, value);
+                hash = hash * 31 + (value != null ? value.GetHashCode() : 0);
             }
         }
         
-        return hashCode;
+        return hash;
     }
 }

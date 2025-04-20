@@ -21,10 +21,11 @@ public class DwCheckboxAttributes : DwTextAttributes
     // override object.GetHashCode
     public override int GetHashCode()
     {
-        return HashCode.Combine(base.GetHashCode(),
-            Label,
-            CheckedValue,
-            UncheckedValue,
-            LeftText);
+        int hash = base.GetHashCode();
+        hash = hash * 31 + (Label != null ? Label.GetHashCode() : 0);
+        hash = hash * 31 + (CheckedValue != null ? CheckedValue.GetHashCode() : 0);
+        hash = hash * 31 + (UncheckedValue != null ? UncheckedValue.GetHashCode() : 0);
+        hash = hash * 31 + LeftText.GetHashCode();
+        return hash;
     }
 }

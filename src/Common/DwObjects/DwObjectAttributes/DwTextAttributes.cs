@@ -53,23 +53,21 @@ namespace yuseok.kim.dw2docs.Common.DwObjects.DwObjectAttributes
         // override object.GetHashCode
         public override int GetHashCode()
         {
-            return HashCode.Combine(base.GetHashCode()
-                , DataType
-                , FormatString
-                , RawText
-                , Text
-                , Alignment
-                , FontSize
-                , HashCode.Combine(
-                    FontWeight
-                    , Underline
-                    , Italics
-                    , Strikethrough
-                    , FontFace
-                    , FontColor
-                    , BackgroundColor
-                    )
-                );
+            var hash = base.GetHashCode();
+            hash = (hash * 17) ^ (Text?.GetHashCode() ?? 0);
+            hash = (hash * 17) ^ (RawText?.GetHashCode() ?? 0);
+            hash = (hash * 17) ^ (FontFace?.GetHashCode() ?? 0);
+            hash = (hash * 17) ^ FontSize.GetHashCode();
+            hash = (hash * 17) ^ FontWeight.GetHashCode();
+            hash = (hash * 17) ^ Italics.GetHashCode();
+            hash = (hash * 17) ^ Underline.GetHashCode();
+            hash = (hash * 17) ^ Strikethrough.GetHashCode();
+            hash = (hash * 17) ^ FontColor.GetHashCode();
+            hash = (hash * 17) ^ BackgroundColor.GetHashCode();
+            hash = (hash * 17) ^ Alignment.GetHashCode();
+            hash = (hash * 17) ^ FormatString?.GetHashCode() ?? 0;
+            hash = (hash * 17) ^ DataType.GetHashCode();
+            return hash;
         }
 
         public override string ToString()

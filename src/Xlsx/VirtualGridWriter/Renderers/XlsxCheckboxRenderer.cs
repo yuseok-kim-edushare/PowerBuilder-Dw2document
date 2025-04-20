@@ -58,7 +58,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers.Xlsx
                     ? $"{RendererConstants.CheckboxCheckedState} "
                     : $"{RendererConstants.CheckboxUncheckedState} ") + textAttribute.Label);
 
-            return new ExportedCell(cell, attribute)
+            return new yuseok.kim.dw2docs.Xlsx.Models.ExportedCell(cell, attribute)
             {
                 OutputCell = renderTarget
             };
@@ -112,10 +112,9 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers.Xlsx
             paragraph.TextAlign = textAttribute.Alignment.ToNpoiTextAlignment();
             textBox.LineStyle = LineStyle.None;
 
-            return new ExportedFloatingCell(cell, attribute)
+            return new yuseok.kim.dw2docs.Xlsx.Models.ExportedFloatingCell(cell, attribute)
             {
                 OutputShape = textBox,
-
             };
         }
     }

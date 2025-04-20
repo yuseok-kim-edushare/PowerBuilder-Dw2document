@@ -234,6 +234,61 @@ namespace yuseok.kim.dw2docs.Common.VirtualGridWriter.Abstractions
             _bandsWithChanges = null;
         }
 
+        /// <summary>
+        /// Process all bands in the virtual grid for rendering
+        /// </summary>
+        /// <returns>A list of the exported cells</returns>
+        protected List<ExportedCellBase> ProcessBands()
+        {
+            var exportedCells = new List<ExportedCellBase>();
+            
+            if (_bandsWithoutRelatedHeaders == null || _bandsWithoutRelatedHeaders.Count == 0)
+            {
+                return exportedCells;
+            }
+            
+            // Reset band index to start from the first band
+            UpdateCurrentBand(0);
+            
+            // Create a dictionary for data - either use previous dataset or create empty
+            var data = new Dictionary<string, DwObjectAttributesBase>();
+                
+            // Copy data from PreviousDataSet if it exists
+            if (PreviousDataSet != null)
+            {
+                foreach (var kvp in PreviousDataSet)
+                {
+                    data[kvp.Key] = kvp.Value;
+                }
+            }
+            
+            // Process each band in order
+            foreach (var band in _bandsWithoutRelatedHeaders)
+            {
+                var result = WriteRows(band.Rows, data);
+                
+                if (result != null)
+                {
+                    exportedCells.AddRange(result);
+                }
+                
+                // Process any related trailers for this band
+                if (band.RelatedTrailers != null && band.RelatedTrailers.Count > 0)
+                {
+                    foreach (var trailer in band.RelatedTrailers)
+                    {
+                        var trailerResult = WriteRows(trailer.Rows, data);
+                        if (trailerResult != null)
+                        {
+                            exportedCells.AddRange(trailerResult);
+                        }
+                    }
+                }
+            }
+            
+            return exportedCells;
+        }
+
         protected abstract IList<ExportedCellBase>? WriteRows(IList<RowDefinition> rows, IDictionary<string, DwObjectAttributesBase> data);
 
         public abstract bool Write(string? sheetname, out string? error);
@@ -253,12 +308,15 @@ namespace yuseok.kim.dw2docs.Common.VirtualGridWriter.Abstractions
                     return false;
                 }
                 
+                // Convert IReadOnlyDictionary to IDictionary by creating a new Dictionary
+                var writableAttributes = controlAttributes.ToDictionary(x => x.Key, x => x.Value);
+                
                 // Process all rows using the control attributes
                 foreach (var band in VirtualGrid.BandRows)
                 {
                     if (band.Rows.Count > 0)
                     {
-                        WriteRows(band.Rows, controlAttributes);
+                        WriteRows(band.Rows, writableAttributes);
                     }
                 }
                 

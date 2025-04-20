@@ -1,37 +1,53 @@
 using yuseok.kim.dw2docs.Common.DwObjects;
+using yuseok.kim.dw2docs.Common.DwObjects.DwObjectAttributes;
 using yuseok.kim.dw2docs.Common.VirtualGrid;
+using yuseok.kim.dw2docs.Common.VirtualGridWriter.Models;
 using yuseok.kim.dw2docs.Common.VirtualGridWriter.Renderers.Common;
 using yuseok.kim.dw2docs.Docx.VirtualGridWriter.DocxWriter;
 using NPOI.XWPF.UserModel;
 
 namespace yuseok.kim.dw2docs.Docx.VirtualGridWriter.Renderers;
 
-public class DocxTextRenderer : ObjectRendererBase<DocxWriterContext, DwText>
+public class DocxTextRenderer : ObjectRendererBase
 {
-    public DocxTextRenderer(DocxWriterContext context, DwText model, RendererLocator<DocxWriterContext> locator)
-        : base(context, model, locator)
+    private readonly DocxWriterContext _context;
+
+    public DocxTextRenderer(DocxWriterContext context)
     {
+        _context = context;
     }
 
-    public override void Render(IVirtualCell cell)
+    public override ExportedCellBase? Render(object context, VirtualCell cell, DwObjectAttributesBase attribute, object renderTarget)
     {
-        // TODO: Determine the target XWPFTableCell. 
-        // We likely need the current XWPFTableRow passed here or accessible from the context.
-        // Assume we get the row: XWPFTableRow currentRow = ...; 
-        // Assume we get the cell index: int cellIndex = cell.OwningColumn?.IndexOffset ?? -1;
-        // if (cellIndex == -1) { /* Handle floating? */ return; }
-        // XWPFTableCell targetCell = currentRow.GetCell(cellIndex);
+        if (attribute is not DwTextAttributes textAttributes)
+        {
+            return null;
+        }
 
-        // Placeholder: Get the text content
-        var text = Model.Attributes.Text; // Or potentially cell.CalculatedValue?
+        // TODO: Determine the target XWPFTableCell and apply text formatting
+        Console.WriteLine($"DOCX Rendering Text: {textAttributes.Text} (Placeholder)");
+        
+        // Return a basic exported cell
+        return new ExportedCell(cell, attribute)
+        {
+            // Set any relevant output information
+        };
+    }
 
-        // TODO: Add text to the targetCell using NPOI
-        // Example:
-        // var paragraph = targetCell.AddParagraph(); // Or get existing?
-        // var run = paragraph.CreateRun();
-        // run.SetText(text);
-        // Apply formatting based on Model.Attributes (font, color, size, alignment etc.)
+    public override ExportedCellBase? Render(object context, FloatingVirtualCell cell, DwObjectAttributesBase attribute, object renderTarget)
+    {
+        if (attribute is not DwTextAttributes textAttributes)
+        {
+            return null;
+        }
 
-        Console.WriteLine($"DOCX Rendering Text: {text} (Placeholder)"); // Placeholder
+        // TODO: Implement floating text rendering for DOCX
+        Console.WriteLine($"DOCX Rendering Floating Text: {textAttributes.Text} (Placeholder)");
+        
+        // Return a basic exported floating cell
+        return new ExportedFloatingCell(cell, attribute)
+        {
+            // Set any relevant output information
+        };
     }
 } 

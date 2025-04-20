@@ -94,13 +94,13 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers.Xlsx
             else
                 renderTarget.SetCellValue(textAttribute.Text);
 
-            return new ExportedCell(cell, attribute)
+            return new yuseok.kim.dw2docs.Xlsx.Models.ExportedCell(cell, attribute)
             {
                 OutputCell = renderTarget,
             };
         }
 
-        public override ExportedCellBase Render(ISheet sheet, FloatingVirtualCell cell, DwObjectAttributesBase attribute, (int x, int y, XSSFDrawing draw) renderTarget)
+        public override ExportedCellBase? Render(ISheet sheet, FloatingVirtualCell cell, DwObjectAttributesBase attribute, (int x, int y, XSSFDrawing draw) renderTarget)
         {
             var textAttribute = CheckAttributeType<DwTextAttributes>(attribute);
 
@@ -142,7 +142,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers.Xlsx
             textBox.LineStyle = LineStyle.None;
             //textBox.SetText();
 
-            return new ExportedFloatingCell(cell, attribute)
+            return new yuseok.kim.dw2docs.Xlsx.Models.ExportedFloatingCell(cell, attribute)
             {
                 OutputShape = textBox,
             };

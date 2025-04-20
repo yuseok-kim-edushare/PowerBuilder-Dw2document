@@ -9,6 +9,7 @@
         <Name>yuseok.kim.dw2docs.test</Name>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,6 +20,15 @@
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
         <PackageReference Include="MSTest.TestAdapter" Version="3.8.3" />
         <PackageReference Include="MSTest.TestFramework" Version="3.8.3" />
+        <PackageReference Include="Polysharp" Version="1.15.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
+
+    <!-- Create TestOutput directory on build -->
+    <Target Name="EnsureTestOutputDirectory" BeforeTargets="Build">
+        <MakeDir Directories="$(OutputPath)TestOutput" />
+    </Target>
 
 </Project>

@@ -1,5 +1,5 @@
 using yuseok.kim.dw2docs.Common.VirtualGrid;
-using yuseok.kim.dw2docs.Common.DwObjects; // Assuming DwObjectAttributesBase is here
+using yuseok.kim.dw2docs.Common.DwObjects.DwObjectAttributes;
 using yuseok.kim.dw2docs.Common.VirtualGridWriter.Models;
 
 namespace yuseok.kim.dw2docs.Common.VirtualGridWriter.Renderers.Common

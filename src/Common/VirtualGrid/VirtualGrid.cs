@@ -49,6 +49,19 @@ namespace yuseok.kim.dw2docs.Common.VirtualGrid
             }
         }
 
+        /// <summary>
+        /// Gets the attributes for a control with the specified name.
+        /// </summary>
+        /// <param name="controlName">The name of the control.</param>
+        /// <returns>The attributes for the control, or null if not found.</returns>
+        public DwObjectAttributesBase? GetAttributes(string controlName)
+        {
+            if (string.IsNullOrEmpty(controlName) || !_controlAttributes.ContainsKey(controlName))
+                return null;
+                
+            return _controlAttributes[controlName];
+        }
+
         public override string ToString()
         {
             var builder = new StringBuilder();

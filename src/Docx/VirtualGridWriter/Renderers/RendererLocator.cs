@@ -1,33 +1,38 @@
-﻿using yuseok.kim.dw2docs.Common.VirtualGridWriter.Models;
+﻿using yuseok.kim.dw2docs.Common.DwObjects;
 using yuseok.kim.dw2docs.Common.VirtualGridWriter.Renderers.Common;
 using System.Collections.Concurrent;
 
 namespace yuseok.kim.dw2docs.Docx.VirtualGridWriter.Renderers;
 
-public class RendererLocator<TContext>
+public class RendererLocator
 {
-    private readonly ConcurrentDictionary<Type, Func<IDwObject, IRenderer<TContext>>> _rendererFactories = new();
-    private readonly TContext _context;
+    private readonly ConcurrentDictionary<Type, ObjectRendererBase> _renderers = new();
 
-    public RendererLocator(TContext context)
+    public RendererLocator()
     {
-        _context = context;
     }
 
-    public void RegisterRenderer<TModel>(Func<TModel, RendererLocator<TContext>, IRenderer<TContext>> factory)
-        where TModel : IDwObject
+    public void RegisterRenderer(Type objectType, ObjectRendererBase renderer)
     {
-        _rendererFactories[typeof(TModel)] = (model) => factory((TModel)model, this);
+        _renderers[objectType] = renderer;
     }
 
-    public IRenderer<TContext> GetRenderer<TModel>(TModel model)
-        where TModel : IDwObject
+    public ObjectRendererBase? Find(Type objectType)
     {
-        if (_rendererFactories.TryGetValue(typeof(TModel), out var factory))
+        if (_renderers.TryGetValue(objectType, out var renderer))
         {
-            return factory(model);
+            return renderer;
         }
 
-        throw new InvalidOperationException($"No renderer registered for model type {typeof(TModel).Name}");
+        // Try to find a renderer for a parent type
+        foreach (var kvp in _renderers)
+        {
+            if (objectType.IsSubclassOf(kvp.Key))
+            {
+                return kvp.Value;
+            }
+        }
+
+        return null;
     }
 }

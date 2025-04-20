@@ -17,7 +17,10 @@
         // override object.GetHashCode
         public override int GetHashCode()
         {
-            return HashCode.Combine(base.GetHashCode(), Text, FontSize);
+            int hash = base.GetHashCode();
+            hash = hash * 31 + (Text != null ? Text.GetHashCode() : 0);
+            hash = hash * 31 + FontSize.GetHashCode();
+            return hash;
         }
     }
 }

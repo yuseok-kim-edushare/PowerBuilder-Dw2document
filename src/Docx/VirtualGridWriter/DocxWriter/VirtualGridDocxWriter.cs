@@ -3,7 +3,7 @@ using yuseok.kim.dw2docs.Common.VirtualGrid;
 using yuseok.kim.dw2docs.Common.VirtualGridWriter.Abstractions;
 using yuseok.kim.dw2docs.Common.VirtualGridWriter.Models;
 using yuseok.kim.dw2docs.Common.VirtualGridWriter.Renderers.Common;
-using yuseok.kim.dw2docs.Docx.VirtualGridWriter.Renderers; // Added for RendererLocator
+using yuseok.kim.dw2docs.Docx.VirtualGridWriter.Renderers;
 using NPOI.OpenXmlFormats.Wordprocessing;
 using NPOI.XWPF.UserModel;
 using System.Diagnostics.CodeAnalysis;
@@ -15,33 +15,38 @@ namespace yuseok.kim.dw2docs.Docx.VirtualGridWriter.DocxWriter
     {
         private readonly XWPFDocument _document;
         private readonly DocxWriterContext _context;
-        private readonly RendererLocator<DocxWriterContext> _rendererLocator;
+        private readonly RendererLocator _rendererLocator;
         private bool _documentInitialized = false;
+        private string? _writeToPath;
 
         private XWPFTable? _workingTable; // This might become part of the context or managed differently
 
         public VirtualGridDocxWriter(VirtualGrid virtualGrid) : base(virtualGrid)
         {
             _document = new XWPFDocument();
-            // Initialize context and locator later in InitDocument to ensure table exists
-            // Need to handle potential nullability before InitDocument is called.
-            // Let's initialize them partially here.
-            _context = new DocxWriterContext(_document, null!); // Temp null! - Will be set in InitDocument
-            _rendererLocator = new RendererLocator<DocxWriterContext>(_context);
-            RegisterRenderers(); // Register renderers needed
+            _workingTable = null;
+            _context = new DocxWriterContext(_document);
+            _rendererLocator = new RendererLocator();
+            RegisterRenderers();
+        }
+
+        public VirtualGridDocxWriter(VirtualGrid virtualGrid, string? writeToPath) : this(virtualGrid)
+        {
+            _writeToPath = writeToPath;
+        }
+
+        public void SetWritePath(string path)
+        {
+            _writeToPath = path;
         }
 
         private void RegisterRenderers()
         {
-            // Register the actual DocxTextRenderer
-            _rendererLocator.RegisterRenderer<DwText>((model, locator) => new DocxTextRenderer(_context, model, locator));
-
-            // TODO: Register other actual Docx Renderers once created
-            // _rendererLocator.RegisterRenderer<DwColumn>((model, locator) => new DocxColumnRenderer(_context, model, locator));
-            // _rendererLocator.RegisterRenderer<DwBand>((model, locator) => new DocxBandRenderer(_context, model, locator));
-            // ... register other renderers (Line, Rectangle, etc.)
+            // Register renderers for different attribute types
+            _rendererLocator.RegisterRenderer(typeof(DwTextAttributes), new DocxTextRenderer(_context));
+            
+            // TODO: Register other renderers as they are implemented
         }
-
 
         [MemberNotNull(nameof(_workingTable))]
         private void InitDocument()
@@ -49,7 +54,6 @@ namespace yuseok.kim.dw2docs.Docx.VirtualGridWriter.DocxWriter
             if (_documentInitialized) return;
 
             _workingTable = _document.CreateTable();
-            // Set the table in the context AFTER it's created
             _context.CurrentTable = _workingTable;
 
             _documentInitialized = true;
@@ -68,46 +72,104 @@ namespace yuseok.kim.dw2docs.Docx.VirtualGridWriter.DocxWriter
             }
         }
 
-
         protected override IList<ExportedCellBase>? WriteRows(IList<RowDefinition> rows, IDictionary<string, DwObjectAttributesBase> data)
         {
-            InitDocument(); // Ensures _workingTable and _context.CurrentTable are initialized
+            // Initialize document and make sure _workingTable is created
+            if (!_documentInitialized)
+            {
+                InitDocument();
+            }
+            else if (_workingTable == null)
+            {
+                // Ensure _workingTable is initialized even if _documentInitialized is somehow true
+                _workingTable = _document.CreateTable();
+                _context.CurrentTable = _workingTable;
+            }
 
-            if (data is null) // Keep data dictionary for potential future use by renderers
+            if (data is null)
                 return null;
+
+            var exportedCells = new List<ExportedCellBase>();
 
             foreach (var row in rows)
             {
-                var newRow = _context.CurrentTable.CreateRow();
+                var newRow = _context.CurrentTable!.CreateRow();
                 newRow.Height = row.Size;
-                // Maybe set CurrentRow in context? -> _context.CurrentRow = newRow;
+                _context.CurrentRow = newRow;
 
-                foreach (var @object in row.Objects.Concat(row.FloatingObjects))
+                foreach (var cellObj in row.Objects.Concat(row.FloatingObjects))
                 {
-                    // Get the appropriate renderer for the object's model type
-                    var renderer = _rendererLocator.GetRenderer(@object.Model);
+                    if (!data.TryGetValue(cellObj.Object.Name, out var attribute))
+                    {
+                        Console.WriteLine($"Warning: No attribute found for cell {cellObj.Object.Name}");
+                        continue;
+                    }
 
-                    // How to pass the cell/row context? 
-                    // Option 1: Modify context (e.g., _context.CurrentRow = newRow;)
-                    // Option 2: Modify Render signature (e.g., Render(IVirtualCell cell, XWPFTableRow row))
-                    // Let's try modifying the Render signature for clarity for now.
-                    // This requires changing ObjectRendererBase and all implementing renderers.
-                    // For now, we will just pass the cell object as before, 
-                    // the renderer will need refinement to get the NPOI cell/row.
-                    renderer.Render(@object);
+                    if (!attribute.IsVisible)
+                    {
+                        Console.WriteLine($"Cell {cellObj.Object.Name} is not visible, skipping");
+                        continue;
+                    }
+
+                    var renderer = _rendererLocator.Find(attribute.GetType());
+                    if (renderer == null)
+                    {
+                        Console.WriteLine($"Warning: No renderer found for attribute type {attribute.GetType().Name}");
+                        continue;
+                    }
+
+                    // Process regular cells
+                    if (cellObj is VirtualCell cell)
+                    {
+                        var columnIndex = cell.OwningColumn?.IndexOffset ?? 0;
+                        XWPFTableCell? targetCell = null;
+                        
+                        try 
+                        {
+                            targetCell = newRow.GetCell(columnIndex);
+                        }
+                        catch
+                        {
+                            // Cell might not exist, create it
+                            while (newRow.GetTableCells().Count <= columnIndex)
+                            {
+                                newRow.CreateCell();
+                            }
+                            targetCell = newRow.GetCell(columnIndex);
+                        }
+
+                        if (targetCell != null)
+                        {
+                            var result = renderer.Render(_context, cell, attribute, targetCell);
+                            if (result != null)
+                            {
+                                exportedCells.Add(result);
+                            }
+                        }
+                    }
+                    // Process floating objects
+                    else if (cellObj is FloatingVirtualCell floatingCell)
+                    {
+                        // For floating cells, we'll need to handle them differently
+                        // Possibly create a paragraph in the document for floating elements
+                        var result = renderer.Render(_context, floatingCell, attribute, newRow);
+                        if (result != null)
+                        {
+                            exportedCells.Add(result);
+                        }
+                    }
                 }
             }
 
-            return null; // Return value might change depending on requirements
-
+            return exportedCells;
         }
 
-        // Write method remains the same
         public override bool Write(string? path, out string? error)
         {
             error = null;
 
-            if (path is null)
+            string targetPath = path ?? _writeToPath ?? string.Empty;
+            if (string.IsNullOrEmpty(targetPath))
             {
                 error = "No file specified";
                 return false;
@@ -115,18 +177,25 @@ namespace yuseok.kim.dw2docs.Docx.VirtualGridWriter.DocxWriter
 
             try
             {
-                // Ensure all rows are processed before writing
-                // The base class logic handles calling ProcessBands/WriteRows, so just write the document
-                using var stream = File.Create(path);
+                // Process the grid to ensure all tables/rows/cells are created
+                base.ProcessBands();
+                
+                // Write the document to the file
+                using var stream = File.Create(targetPath);
                 _document.Write(stream);
+                
+                return true;
             }
             catch (IOException e)
             {
                 error = e.ToString();
                 return false;
             }
-
-            return true;
+            catch (Exception ex)
+            {
+                error = $"Error writing document: {ex.Message}";
+                return false;
+            }
         }
     }
 }

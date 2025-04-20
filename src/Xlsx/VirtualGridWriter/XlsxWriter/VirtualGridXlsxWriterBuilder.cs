@@ -39,7 +39,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
 
             if (string.IsNullOrEmpty(WriteToPath))
             {
-                error = "Must specify a non-empty path in WriteToPath";
+                error = "Must specify a path";
                 LogToFile("Error in Build: WriteToPath is null or empty.");
                 return null;
             }
@@ -100,7 +100,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                 LogToFile("Attempting to create VirtualGridXlsxWriter instance.");
                 // Pass the created workbook, stream, and target sheet name
                 // The writer will now be responsible for disposing the stream and workbook
-                return new VirtualGridXlsxWriter(grid, workbook, stream, targetSheetName);
+                return new VirtualGridXlsxWriter(grid, workbook, stream, targetSheetName!);
             }
             catch (Exception e)
             {

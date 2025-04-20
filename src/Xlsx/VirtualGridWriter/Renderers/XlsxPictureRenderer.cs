@@ -106,7 +106,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers
             {
                 outputShape = (XSSFPicture)renderTarget.draw.CreatePicture(anchor, pictureIndex);
             }
-            return new ExportedFloatingCell(cell, attribute)
+            return new yuseok.kim.dw2docs.Xlsx.Models.ExportedFloatingCell(cell, attribute)
             {
                 OutputShape = outputShape,
             };

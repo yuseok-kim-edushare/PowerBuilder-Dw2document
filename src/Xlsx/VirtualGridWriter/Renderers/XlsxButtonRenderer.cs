@@ -51,7 +51,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers
             // Set the button text
             renderTarget.SetCellValue(buttonAttributes.Text);
             
-            return new ExportedCell(cell, attribute)
+            return new yuseok.kim.dw2docs.Xlsx.Models.ExportedCell(cell, attribute)
             {
                 OutputCell = renderTarget
             };
@@ -81,7 +81,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers
             run.FontSize = buttonAttributes.FontSize;
             run.Text = buttonAttributes.Text;
 
-            return new ExportedFloatingCell(cell, attribute)
+            return new yuseok.kim.dw2docs.Xlsx.Models.ExportedFloatingCell(cell, attribute)
             {
                 OutputShape = shape,
             };

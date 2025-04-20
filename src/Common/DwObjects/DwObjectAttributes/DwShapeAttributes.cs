@@ -33,13 +33,14 @@ namespace yuseok.kim.dw2docs.Common.DwObjects.DwObjectAttributes
         // override object.GetHashCode
         public override int GetHashCode()
         {
-            return HashCode.Combine(Shape
-                , FillColor
-                , FillColor
-                , OutlineColor
-                , OutlineStyle
-                , OutlineWidth
-                );
+            int hash = 17;
+            hash = hash * 31 + (int)Shape;
+            hash = hash * 31 + FillColor.GetHashCode();
+            hash = hash * 31 + (int)FillStyle;
+            hash = hash * 31 + OutlineColor.GetHashCode();
+            hash = hash * 31 + (int)OutlineStyle;
+            hash = hash * 31 + OutlineWidth.GetHashCode();
+            return hash;
         }
     }
 }

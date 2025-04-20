@@ -189,7 +189,7 @@ namespace yuseok.kim.dw2docs.test.Xlsx
             CleanupFile(testFilePath);
             
             const string sheet1Name = "Sheet1";
-            const string sheet2Name = "Sheet2";
+            //const string sheet2Name = "Sheet2";
             
             // Arrange - First create a file with one sheet
             {

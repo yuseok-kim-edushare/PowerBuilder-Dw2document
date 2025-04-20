@@ -14,9 +14,9 @@ namespace yuseok.kim.dw2docs.test.Xlsx
     public class VirtualGridXlsxWriterTests
     {
         private const string TestOutputDir = "TestOutput";
-        private List<XSSFWorkbook> _openWorkbooks = new List<XSSFWorkbook>();
-        private List<FileStream> _openStreams = new List<FileStream>();
-        private List<string> _createdFiles = new List<string>();
+        private readonly List<XSSFWorkbook> _openWorkbooks = new List<XSSFWorkbook>();
+        private readonly List<FileStream> _openStreams = new List<FileStream>();
+        private readonly List<string> _createdFiles = new List<string>();
 
         public VirtualGridXlsxWriterTests()
         {
@@ -122,7 +122,7 @@ namespace yuseok.kim.dw2docs.test.Xlsx
             // Make sure to set the writer's path
             ((VirtualGridXlsxWriter)writer).SetWritePath(testFilePath);
             
-            var result = writer.Write(null, out error);
+            bool result = writer.Write(null, out error);
 
             // Dispose the writer to release resources
             ((System.IDisposable)writer).Dispose();
@@ -163,7 +163,7 @@ namespace yuseok.kim.dw2docs.test.Xlsx
             // Make sure to set the writer's path
             ((VirtualGridXlsxWriter)writer).SetWritePath(testFilePath);
             
-            var result = writer.Write(sheetName, out error);
+            bool result = writer.Write(sheetName, out error);
             
             // Dispose the writer to release resources
             ((System.IDisposable)writer).Dispose();
@@ -183,8 +183,8 @@ namespace yuseok.kim.dw2docs.test.Xlsx
             Thread.Sleep(200);
             
             // Verify the sheet name in a separate try block with more graceful error handling
-            FileStream stream = null;
-            XSSFWorkbook workbook = null;
+            FileStream? stream = null;
+            XSSFWorkbook? workbook = null;
             
             try
             {
@@ -266,7 +266,7 @@ namespace yuseok.kim.dw2docs.test.Xlsx
             // Assert
             Assert.IsNull(writer, "Builder should return null for non-existent file with append mode");
             Assert.IsNotNull(error, "Error message should not be null");
-            Assert.IsTrue(error.Contains("does not exist"), "Error should mention non-existent file");
+            Assert.IsTrue(error?.Contains("does not exist") ?? false, "Error should mention non-existent file");
         }
 
         [TestMethod]
@@ -292,7 +292,7 @@ namespace yuseok.kim.dw2docs.test.Xlsx
                 // Make sure to set the writer's path
                 ((VirtualGridXlsxWriter)firstWriter).SetWritePath(testFilePath);
                 
-                var result = firstWriter.Write(null, out error1);
+                bool result = firstWriter.Write(null, out error1);
                 Assert.IsTrue(result, $"First write operation failed: {error1}");
                 
                 // Dispose the writer
@@ -333,7 +333,7 @@ namespace yuseok.kim.dw2docs.test.Xlsx
             CleanupFile(testFilePath);
             
             const string sheet1Name = "Sheet1";
-            const string sheet2Name = "Sheet2";
+            //const string sheet2Name = "Sheet2";
             
             // Arrange - create a file with the first sheet
             {
@@ -348,7 +348,7 @@ namespace yuseok.kim.dw2docs.test.Xlsx
                 // Make sure to set the writer's path
                 ((VirtualGridXlsxWriter)writer1).SetWritePath(testFilePath);
                 
-                var result = writer1.Write(sheet1Name, out error1);
+                bool result = writer1.Write(sheet1Name, out error1);
                 Assert.IsTrue(result, $"First write operation failed: {error1}");
                 
                 // Dispose the writer

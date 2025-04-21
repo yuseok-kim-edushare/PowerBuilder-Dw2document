@@ -46,9 +46,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)'=='net6.0-windows'">
     <MergeAssemblies Include="$(OutputPath)\publish\$(AssemblyName).dll" /> <!-- The main merged DLL -->
-    <MergeAssemblies Include="$(OutputPath)\publish\BouncyCastle.Cryptography.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\Enums.Net.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\ExtendedNumerics.BigDecimal.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\BouncyCastle.Crypto.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\ICSharpCode.SharpZipLib.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\MathNet.Numerics.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
@@ -59,26 +57,21 @@
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Primitives.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.IO.RecyclableMemoryStream.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Win32.SystemEvents.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.Core.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXml4Net.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXmlFormats.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.Fonts.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.ImageSharp.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Configuration.ConfigurationManager.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Drawing.Common.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\System.Formats.Asn1.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Pkcs.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Xml.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.ProtectedData.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Permissions.dll" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net8.0-windows'">
     <MergeAssemblies Include="$(OutputPath)\publish\$(AssemblyName).dll" /> <!-- The main merged DLL -->
-    <MergeAssemblies Include="$(OutputPath)\publish\BouncyCastle.Cryptography.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\Enums.Net.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\ExtendedNumerics.BigDecimal.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\BouncyCastle.Crypto.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\ICSharpCode.SharpZipLib.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\MathNet.Numerics.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+        <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.DependencyInjection.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Logging.Abstractions.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Logging.dll" />
@@ -86,25 +79,21 @@
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Primitives.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.IO.RecyclableMemoryStream.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Win32.SystemEvents.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.Core.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXml4Net.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXmlFormats.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.Fonts.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.ImageSharp.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Configuration.ConfigurationManager.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Drawing.Common.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Private.Windows.Core.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Pkcs.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Xml.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.ProtectedData.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Permissions.dll" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net481'">
     <MergeAssemblies Include="$(OutputPath)\publish\$(AssemblyName).dll" /> <!-- The main merged DLL -->
-    <MergeAssemblies Include="$(OutputPath)\publish\BouncyCastle.Cryptography.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\Enums.Net.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\ExtendedNumerics.BigDecimal.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\BouncyCastle.Crypto.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\ICSharpCode.SharpZipLib.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\MathNet.Numerics.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Bcl.AsyncInterfaces.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.DependencyInjection.dll" />
@@ -113,12 +102,10 @@
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Options.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Primitives.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.IO.RecyclableMemoryStream.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.Core.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\NPOI.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXml4Net.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXmlFormats.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.Fonts.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.ImageSharp.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Buffers.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Diagnostics.DiagnosticSource.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Drawing.Common.dll" />
@@ -126,9 +113,6 @@
     <MergeAssemblies Include="$(OutputPath)\publish\System.Memory.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Numerics.Vectors.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Runtime.CompilerServices.Unsafe.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Pkcs.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Xml.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\System.Text.Encoding.CodePages.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Text.Encodings.Web.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Text.Json.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Threading.Tasks.Extensions.dll" />

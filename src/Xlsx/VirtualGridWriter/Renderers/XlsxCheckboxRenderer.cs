@@ -7,7 +7,6 @@ using yuseok.kim.dw2docs.Xlsx.Extensions;
 using yuseok.kim.dw2docs.Xlsx.Models;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers.Xlsx
 {
@@ -92,9 +91,11 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers.Xlsx
 
             var paragraph = textBox.TextParagraphs[0];
             var run = paragraph.AddNewTextRun();
-            run.FontColor = new Rgb24(textAttribute.FontColor.Value.R,
+            run.FontColor = System.Drawing.Color.FromArgb(
+                textAttribute.FontColor.Value.R,
                 textAttribute.FontColor.Value.G,
-                textAttribute.FontColor.Value.B);
+                textAttribute.FontColor.Value.B
+            );
             if (textAttribute.LeftText)
                 run.Text = textAttribute.Label + (textAttribute.Text == textAttribute.CheckedValue
                     ? $" {RendererConstants.CheckboxCheckedState}"

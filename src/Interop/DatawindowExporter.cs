@@ -17,25 +17,25 @@ namespace yuseok.kim.dw2docs.Interop
     /// </summary>
     public class DatawindowExporter
     {
-        // Static constructor to pre-warm XmlSerializer for NPOI types
-        // This helps prevent "An element that returns the type... already exists" errors
-        static DatawindowExporter()
-        {
-            try
-            {
-                Console.WriteLine("Pre-warming XmlSerializer for NPOI types...");
-                // Pre-create serializers for the problematic NPOI types
-                var _ = new System.Xml.Serialization.XmlSerializer(typeof(NPOI.OpenXmlFormats.ExtendedPropertiesDocument));
-                var __ = new System.Xml.Serialization.XmlSerializer(typeof(NPOI.OpenXmlFormats.CT_ExtendedProperties));
-                var ___ = new System.Xml.Serialization.XmlSerializer(typeof(NPOI.OpenXmlFormats.CT_Vector));
-                Console.WriteLine("XmlSerializer pre-warming complete.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Warning: XmlSerializer pre-warming failed: {ex.Message}");
-                // Continue execution even if pre-warming fails
-            }
-        }
+        // // Static constructor to pre-warm XmlSerializer for NPOI types
+        // // This helps prevent "An element that returns the type... already exists" errors
+        // static DatawindowExporter()
+        // {
+        //     try
+        //     {
+        //         LogToFile("Pre-warming XmlSerializer for NPOI types...");
+        //         // Pre-create serializers for the problematic NPOI types
+        //         var _ = new System.Xml.Serialization.XmlSerializer(typeof(NPOI.OpenXmlFormats.ExtendedPropertiesDocument));
+        //         var __ = new System.Xml.Serialization.XmlSerializer(typeof(NPOI.OpenXmlFormats.CT_ExtendedProperties));
+        //         var ___ = new System.Xml.Serialization.XmlSerializer(typeof(NPOI.OpenXmlFormats.CT_Vector));
+        //         LogToFile("XmlSerializer pre-warming complete.");
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         LogToFile($"Warning: XmlSerializer pre-warming failed: {ex.Message}", ex);
+        //         // Continue execution even if pre-warming fails
+        //     }
+        // }
 
         /// <summary>
         /// Export datawindow data in JSON format to Excel
@@ -145,11 +145,11 @@ namespace yuseok.kim.dw2docs.Interop
                 var controlAttributes = controlAttributesProp?.GetValue(grid) as IDictionary<string, object>;
                 if (controlAttributes != null)
                 {
-                    Console.WriteLine("[ExportToWord] ControlAttributes keys: " + string.Join(", ", controlAttributes.Keys));
+                    LogToFile("[ExportToWord] ControlAttributes keys: " + string.Join(", ", controlAttributes.Keys));
                 }
                 else
                 {
-                    Console.WriteLine("[ExportToWord] ControlAttributes is null");
+                    LogToFile("[ExportToWord] ControlAttributes is null");
                 }
 
                 return $"Success: Word file created at {outputPath}";
@@ -359,6 +359,25 @@ namespace yuseok.kim.dw2docs.Interop
                 cellsByY,
                 cells
             });
+        }
+        private const string LogFilePath = @"C:\temp\Dw2Doc_ExcelError.log";
+
+        private static void LogToFile(string message, Exception? ex = null)
+        {
+            try
+            {
+                string logContent = $"[{DateTime.Now}] {message}";
+                if (ex != null)
+                {
+                    logContent += $"\nException Type: {ex.GetType().FullName}\nMessage: {ex.Message}\nStackTrace:\n{ex.StackTrace}";
+                }
+                logContent += "\n---------------------------------\n";
+                File.AppendAllText(LogFilePath, logContent);
+            }
+            catch (Exception logEx)
+            {
+                Console.WriteLine($"!!! Failed to write to log file {LogFilePath}: {logEx.Message}");
+            }
         }
     }
 } 

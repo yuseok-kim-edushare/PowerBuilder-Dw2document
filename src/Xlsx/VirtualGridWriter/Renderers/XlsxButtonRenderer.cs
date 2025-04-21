@@ -72,7 +72,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers
             var shape = renderTarget.draw.CreateSimpleShape(anchor);
             shape.FillColor = Color.White.ToRgb();
             shape.LineStyle = LineStyle.Solid;
-            shape.LineStyleColor = Color.Gray.ToRgb();
+            shape.SetLineStyleColor(Color.Gray.ToRgb());
             shape.LineWidth = 1;
             shape.ShapeType = (int)ShapeTypes.RoundedRectangle;
             var paragraph = shape.TextParagraphs[0];

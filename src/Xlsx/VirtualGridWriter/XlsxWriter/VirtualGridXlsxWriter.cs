@@ -98,8 +98,35 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
         private void RegisterRenderers()
         {
             // Register renderers for different attribute types
-            // Example:
-            // _rendererLocator.RegisterRenderer(typeof(DwTextAttributes), new XlsxTextRenderer());
+            _rendererLocator.RegisterRenderer(
+                typeof(DwTextAttributes),
+                new yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers.Xlsx.XlsxTextRenderer()
+            );
+            _rendererLocator.RegisterRenderer(
+                typeof(DwCheckboxAttributes),
+                new yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers.Xlsx.XlsxCheckboxRenderer()
+            );
+            _rendererLocator.RegisterRenderer(
+                typeof(DwRadioButtonAttributes),
+                new yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers.Xlsx.XlsxRadioButtonRenderer()
+            );
+            _rendererLocator.RegisterRenderer(
+                typeof(DwButtonAttributes),
+                new yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers.XlsxButtonRenderer()
+            );
+            _rendererLocator.RegisterRenderer(
+                typeof(DwPictureAttributes),
+                new yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers.XlsxPictureRenderer()
+            );
+            _rendererLocator.RegisterRenderer(
+                typeof(DwShapeAttributes),
+                new yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers.XlsxShapeRenderer()
+            );
+            _rendererLocator.RegisterRenderer(
+                typeof(DwLineAttributes),
+                new yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers.XlsxLineRenderer()
+            );
+            // Add other renderers as needed
         }
 
         public void SetWritePath(string path)
@@ -131,6 +158,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
             InitWriter();
             if (data is null)
             {
+                LogToFile("Data is null, cannot write rows");
                 Console.WriteLine("Data is null, cannot write rows");
                 return null;
             }
@@ -149,7 +177,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
 
                 var exportedCells = new List<ExportedCellBase>();
                 ExportedCellBase? exportedCell = null;
-                
+                LogToFile($"Processing {rows.Count} rows");
                 Console.WriteLine($"Processing {rows.Count} rows");
                 
                 foreach (var row in rows)
@@ -158,6 +186,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                     
                     // Create a physical row in the sheet
                     var xRow = _sheet.CreateRow(_startRowOffset + _currentRowOffset);
+                    LogToFile($"Created row at index {_startRowOffset + _currentRowOffset}");
                     Console.WriteLine($"Created row at index {_startRowOffset + _currentRowOffset}");
 
                     checked
@@ -171,18 +200,21 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                     
                     // Combine regular and floating objects for processing
                     var allCells = row.Objects.Concat(row.FloatingObjects).ToList();
+                    LogToFile($"Processing {allCells.Count} cells in row");
                     Console.WriteLine($"Processing {allCells.Count} cells in row");
                     
                     foreach (var cell in allCells)
                     {
                         if (!data.TryGetValue(cell.Object.Name, out var attribute))
                         {
+                            LogToFile($"Warning: No attribute found for cell {cell.Object.Name}");
                             Console.WriteLine($"Warning: No attribute found for cell {cell.Object.Name}");
                             continue;
                         }
 
                         if (!attribute.IsVisible)
                         {
+                            LogToFile($"Cell {cell.Object.Name} is not visible, skipping");
                             Console.WriteLine($"Cell {cell.Object.Name} is not visible, skipping");
                             continue;
                         }
@@ -191,6 +223,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                         var rendererBase = _rendererLocator.Find(attribute.GetType());
                         if (rendererBase == null)
                         {
+                            LogToFile($"Warning: Could not find renderer for attribute type {attribute.GetType().FullName}");
                             Console.WriteLine($"Warning: Could not find renderer for attribute type {attribute.GetType().FullName}");
                             continue;
                         }
@@ -208,6 +241,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                         if (cell.OwningColumn is not null && !cell.Object.Floating)
                         { // cell is not floating
                             var xCell = xRow.CreateCell(cell.OwningColumn.IndexOffset + _startColumnOffset);
+                            LogToFile($"Created cell at column {cell.OwningColumn.IndexOffset + _startColumnOffset} for {cell.Object.Name}");
                             Console.WriteLine($"Created cell at column {cell.OwningColumn.IndexOffset + _startColumnOffset} for {cell.Object.Name}");
 
                             var style = _workbook.CreateCellStyle();
@@ -240,10 +274,12 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                             {
                                 exportedCells.Add(exportedCell);
                                 cellsProcessed++;
+                                LogToFile($"Successfully rendered cell {cell.Object.Name}");
                                 Console.WriteLine($"Successfully rendered cell {cell.Object.Name}");
                             }
                             else
                             {
+                                LogToFile($"Warning: Renderer returned null for cell {cell.Object.Name}");
                                 Console.WriteLine($"Warning: Renderer returned null for cell {cell.Object.Name}");
                             }
 
@@ -267,6 +303,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                         { // cell is floating
                             if (cell is not FloatingVirtualCell floatingCell)
                             {
+                                LogToFile("Warning: Non-floating cell in FloatingObjects list");
                                 Console.WriteLine("Warning: Non-floating cell in FloatingObjects list");
                                 throw new InvalidOperationException("Non-floating cell in FloatingObjects list");
                             }
@@ -285,16 +322,19 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                                 {
                                     exportedCells.Add(exportedCell);
                                     cellsProcessed++;
+                                    LogToFile($"Successfully rendered floating cell {cell.Object.Name}");
                                     Console.WriteLine($"Successfully rendered floating cell {cell.Object.Name}");
                                 }
                                 else
                                 {
+                                    LogToFile($"Warning: Renderer returned null for floating cell {cell.Object.Name}");
                                     Console.WriteLine($"Warning: Renderer returned null for floating cell {cell.Object.Name}");
                                 }
                             }
                         }
                     }
 
+                    LogToFile($"Processed {cellsProcessed} cells out of {allCells.Count} for row"); 
                     Console.WriteLine($"Processed {cellsProcessed} cells out of {allCells.Count} for row");
 
                     // Handle empty rows or filler rows
@@ -321,18 +361,21 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                     if (cellsProcessed == 0 && xRow.PhysicalNumberOfCells == 0)
                     {
                         xRow.CreateCell(0);
+                        LogToFile("Created empty cell to ensure row exists");
                         Console.WriteLine("Created empty cell to ensure row exists");
                     }
 
                     ++_currentRowOffset;
                 }
                 
+                LogToFile($"Finished processing rows, created {exportedCells.Count} cells");
                 Console.WriteLine($"Finished processing rows, created {exportedCells.Count} cells");
                 return exportedCells;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception in WriteRows: {ex.Message}");
+                LogToFile($"!!! EXCEPTION in WriteRows: {ex.Message}", ex);
+                Console.WriteLine($"!!! EXCEPTION in WriteRows: {ex.Message}");
                 _destinationFile?.Close();
 
                 var match = mergedCellsRegex.Match(ex.Message);
@@ -354,17 +397,22 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
             if (string.IsNullOrEmpty(targetPath))
             {
                 error = "No file specified";
-                return false;
+                LogToFile("No file specified");
             }
 
             if (_workbook == null)
             {
                 error = "Workbook is null";
-                return false;
+                LogToFile("Workbook is null");
             }
             if (_closed)
             {
                 error = "This writer has already been closed";
+                LogToFile("This writer has already been closed");
+            }
+            
+            if (error != null)
+            {
                 return false;
             }
             
@@ -376,14 +424,14 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                     _sheet = (XSSFSheet)_workbook.CreateSheet(sheetname ?? "Sheet1");
                     // Set sheet as active
                     _workbook.SetActiveSheet(_workbook.GetSheetIndex(_sheet));
-                    Console.WriteLine($"Created sheet with name: {sheetname ?? "Sheet1"}");
+                    LogToFile($"Created sheet with name: {sheetname ?? "Sheet1"}");
                 }
                 else if (!string.IsNullOrEmpty(sheetname) && _workbook.GetSheetName(_workbook.GetSheetIndex(_sheet)) != sheetname)
                 {
                     // Rename the sheet if needed
                     int sheetIndex = _workbook.GetSheetIndex(_sheet);
                     _workbook.SetSheetName(sheetIndex, sheetname);
-                    Console.WriteLine($"Renamed sheet to: {sheetname}");
+                    LogToFile($"Renamed sheet to: {sheetname}");
                 }
                 
                 // Only process control attributes if sheet is empty and we weren't called from WriteEntireGrid
@@ -402,7 +450,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                         
                         if (controlAttributes != null && controlAttributes.Count > 0)
                         {
-                            Console.WriteLine($"Direct call to Write: Processing {controlAttributes.Count} attributes");
+                            LogToFile($"Direct call to Write: Processing {controlAttributes.Count} attributes");
                             
                             // Process each band's rows with the attributes
                             foreach (var band in VirtualGrid.BandRows)
@@ -412,42 +460,42 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                                     var exportedCells = WriteRows(band.Rows, controlAttributes);
                                     if (exportedCells == null || exportedCells.Count == 0)
                                     {
-                                        Console.WriteLine($"Warning: No cells were written for band {band.Name}");
+                                        LogToFile($"Warning: No cells were written for band {band.Name}");
                                     }
                                     else
                                     {
-                                        Console.WriteLine($"Wrote {exportedCells.Count} cells for band {band.Name}");
+                                        LogToFile($"Wrote {exportedCells.Count} cells for band {band.Name}");
                                     }
                                 }
                             }
                         }
                         else
                         {
-                            Console.WriteLine("Warning: No control attributes found in VirtualGrid for rendering");
+                            LogToFile("Warning: No control attributes found in VirtualGrid for rendering");
                         }
                     }
                     else
                     {
-                        Console.WriteLine("Warning: Could not access _controlAttributes field in VirtualGrid");
+                        LogToFile("Warning: Could not access _controlAttributes field in VirtualGrid");
                     }
                 }
                 else if (calledFromWriteEntireGrid)
                 {
-                    Console.WriteLine("Called from WriteEntireGrid, skipping row processing");
+                    LogToFile("Called from WriteEntireGrid, skipping row processing");
                 }
                 
                 // Verify we have written data to the sheet
                 if (_sheet.PhysicalNumberOfRows == 0)
                 {
-                    Console.WriteLine("Warning: Sheet has no rows after processing");
+                    LogToFile("Warning: Sheet has no rows after processing");
                     
                     // Create at least one row to ensure the sheet exists in the output
                     var emptyRow = _sheet.CreateRow(0);
                     emptyRow.CreateCell(0);
-                    Console.WriteLine("Created an empty row/cell to ensure sheet is present in the workbook");
+                    LogToFile("Created an empty row/cell to ensure sheet is present in the workbook");
                 }
                 
-                Console.WriteLine("Writing workbook to file...");
+                LogToFile("Writing workbook to file...");
                 
                 // Different file handling approach to avoid the stream closing issues
                 try
@@ -455,7 +503,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                     // Clean up our file stream if it's still open
                     if (_destinationFile != null)
                     {
-                        Console.WriteLine("Closing existing file stream");
+                        LogToFile("Closing existing file stream");
                         _destinationFile.Flush(); // Ensure all data is written
                         _destinationFile.Close();
                         _destinationFile.Dispose();
@@ -464,17 +512,17 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                     }
                     
                     // Use a completely new stream just for writing the final output
-                    Console.WriteLine($"Creating new file stream for final output: {targetPath}");
+                    LogToFile($"Creating new file stream for final output: {targetPath}");
                     using (var fs = new FileStream(targetPath, FileMode.Create, FileAccess.Write))
                     {
                         _workbook.Write(fs);
-                        Console.WriteLine("Workbook written successfully");
+                        LogToFile("Workbook written successfully");
                     }
-                    Console.WriteLine($"File written: {targetPath}");
+                    LogToFile($"File written: {targetPath}");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error writing file: {ex.Message}");
+                    LogToFile($"Error writing file: {ex.Message}", ex);
                     throw;
                 }
                 
@@ -484,23 +532,24 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                 if (File.Exists(targetPath))
                 {
                     var fileInfo = new FileInfo(targetPath);
-                    Console.WriteLine($"Created file size: {fileInfo.Length} bytes");
+                    LogToFile($"Created file size: {fileInfo.Length} bytes");
                     
                     // Additional verification step - try to open the file to ensure it's valid
                     try
                     {
                         using var testStream = new FileStream(targetPath, FileMode.Open, FileAccess.Read);
-                        using var testWorkbook = new XSSFWorkbook(testStream);
-                        Console.WriteLine($"Verification: File contains {testWorkbook.NumberOfSheets} sheet(s)");
+                        var testWorkbook = new XSSFWorkbook(testStream);
+                        LogToFile($"Verification: File contains {testWorkbook.NumberOfSheets} sheet(s)");
+                        testWorkbook.Close();
                     }
                     catch (Exception vex)
                     {
-                        Console.WriteLine($"Warning: Created file may be corrupted: {vex.Message}");
+                        LogToFile($"Warning: Created file may be corrupted: {vex.Message}", vex);
                     }
                 }
                 else
                 {
-                    Console.WriteLine("Warning: File does not exist after writing");
+                    LogToFile("Warning: File does not exist after writing");
                 }
                 
                 return true;
@@ -508,13 +557,13 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
             catch (IOException e)
             {
                 error = $"IO Error: {e.Message}";
-                Console.WriteLine($"IO Exception: {e}");
+                LogToFile($"IO Exception: {e}");
                 return false;
             }
             catch (Exception e)
             {
                 error = $"Unexpected error: {e.Message}\nStackTrace: {e.StackTrace}\nInnerException: {e.InnerException}";
-                Console.WriteLine($"Exception: {e}");
+                LogToFile($"Exception: {e}");
                 return false;
             }
             finally
@@ -557,7 +606,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                 // }
                 // catch (Exception ex)
                 // {
-                //     Console.WriteLine($"Error in cleanup: {ex.Message}");
+                //     LogToFile($"Error in cleanup: {ex.Message}", ex);
                 // }
             }
         }

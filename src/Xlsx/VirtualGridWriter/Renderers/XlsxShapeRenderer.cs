@@ -36,7 +36,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers
                 shape.IsNoFill = true;
             }
             shape.LineStyle = shapeAttribute.OutlineStyle.DwLineStyleToNpoiLineStyle();
-            shape.LineStyleColor = shapeAttribute.OutlineColor.Value.ToRgb();
+            shape.SetLineStyleColor(shapeAttribute.OutlineColor.Value.ToRgb());
             shape.LineWidth = shapeAttribute.OutlineWidth;
             shape.ShapeType = (int)(shapeAttribute.Shape switch
             {

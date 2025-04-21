@@ -126,45 +126,28 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
 
         protected virtual XSSFWorkbook CreateWorkbook()
         {
-            LogToFile("Creating new workbook using byte array template approach");
-            
             string tempFile = Path.Combine(Path.GetTempPath(), $"excel_temp_{Guid.NewGuid()}.xlsx");
             try
             {
-                // Use a hard-coded minimal Excel file to bypass all NPOI issues
+                // Use a hard-coded minimal Excel file
                 byte[] minimalExcelFile = MinimalXlsxBytes.GetBytes();
-                
-                // Write the minimal Excel file to disk
                 File.WriteAllBytes(tempFile, minimalExcelFile);
-                
-                // Now try to open it with XSSFWorkbook
                 using (var fs = new FileStream(tempFile, FileMode.Open, FileAccess.Read))
                 {
-                    return new XSSFWorkbook(fs);
+                    var result = new XSSFWorkbook(fs);
+                    // Clean up
+                    try { if (File.Exists(tempFile)) File.Delete(tempFile); } catch { }
+                    return result;
                 }
             }
             catch (Exception ex)
             {
-                LogToFile($"Byte array template approach failed: {ex.Message}", ex);
-                
-                // Since all NPOI approaches are failing, provide a clear error message
+                LogToFile("!!! EXCEPTION during workbook creation in CreateWorkbook", ex);
                 throw new InvalidOperationException(
                     "All attempts to create an Excel workbook have failed. " +
                     "This appears to be a bug in the NPOI library with your environment. " + 
                     "Consider using a pre-created template file or a different Excel library. " +
                     "Error: " + ex.Message, ex);
-            }
-            finally
-            {
-                // Clean up the temp file
-                try
-                {
-                    if (File.Exists(tempFile))
-                    {
-                        File.Delete(tempFile);
-                    }
-                }
-                catch { /* Ignore cleanup errors */ }
             }
         }
     }

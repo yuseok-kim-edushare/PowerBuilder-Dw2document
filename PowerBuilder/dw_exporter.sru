@@ -19,6 +19,7 @@ public function boolean of_initialize ()
 public function string of_export_to_excel (datawindow adw_source, string as_output_path, string as_sheet_name)
 public function string of_export_to_word (datawindow adw_source, string as_output_path)
 private function string of_datawindow_to_json (datawindow adw_source)
+private function string json_escape(string value)
 public subroutine of_seterrorhandler (powerobject apo_newhandler, string as_newevent)
 end prototypes
 
@@ -37,6 +38,7 @@ end try
 end function
 
 public function string of_export_to_excel (datawindow adw_source, string as_output_path, string as_sheet_name);
+
 // Export DataWindow to Excel
 try
     if IsNull(inv_exporter) or Not IsValid(inv_exporter) then
@@ -48,9 +50,12 @@ try
     // Convert DataWindow to JSON data
     string ls_json_data
     ls_json_data = of_datawindow_to_json(adw_source)
-    
-    // Add before calling of_exporttoexcel
-    MessageBox("JSON", Left(ls_json_data, 1000))
+	 
+	// export json into text file for debugging
+	integer li_file
+	li_file = FileOpen("C:\temp\dw2docs-json.txt",LineMode!, Write!)
+	FileWrite(li_file,ls_json_data)
+	FileClose(li_file)
     
     // Try first deleting any existing file
     FileDelete(as_output_path)
@@ -155,7 +160,7 @@ try
                 if IsNull(ls_value) then ls_value = ""
                 
                 // Add to JSON
-                ls_json += '"' + ls_column + '":"' + ls_value + '"'
+                ls_json += '"' + ls_column + '":"' + json_escape(ls_value) + '"'
             end if
         loop
         
@@ -172,6 +177,43 @@ catch (Exception le_ex)
     MessageBox("JSON Conversion Error", le_ex.getMessage())
     return "{}"
 end try
+end function
+
+private function string json_escape(string value);
+string ls_result
+integer li_pos
+
+ls_result = value
+
+// Escape backslash
+li_pos = Pos(ls_result, "~\\")
+do while li_pos > 0
+    ls_result = Left(ls_result, li_pos - 1) + "~\\~\\" + Mid(ls_result, li_pos + 1)
+    li_pos = Pos(ls_result, "~\\", li_pos + 2)
+loop
+
+// Escape double quote
+li_pos = Pos(ls_result, "~"")
+do while li_pos > 0
+    ls_result = Left(ls_result, li_pos - 1) + "~\\~"" + Mid(ls_result, li_pos + 1)
+    li_pos = Pos(ls_result, "~"", li_pos + 3)
+loop
+
+// Escape newline
+li_pos = Pos(ls_result, Char(10))
+do while li_pos > 0
+    ls_result = Left(ls_result, li_pos - 1) + "\\n" + Mid(ls_result, li_pos + 1)
+    li_pos = Pos(ls_result, Char(10), li_pos + 2)
+loop
+
+// Escape carriage return
+li_pos = Pos(ls_result, Char(13))
+do while li_pos > 0
+    ls_result = Left(ls_result, li_pos - 1) + "\\r" + Mid(ls_result, li_pos + 1)
+    li_pos = Pos(ls_result, Char(13), li_pos + 2)
+loop
+
+return ls_result
 end function
 
 event ue_error();

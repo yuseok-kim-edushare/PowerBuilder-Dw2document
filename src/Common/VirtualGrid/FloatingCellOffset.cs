@@ -10,12 +10,12 @@ namespace yuseok.kim.dw2docs.Common.VirtualGrid
         /// <summary>
         /// Gets or sets the start column
         /// </summary>
-        public ColumnDefinition StartColumn { get; set; }
+        public ColumnDefinition? StartColumn { get; set; }
         
         /// <summary>
         /// Gets or sets the start row
         /// </summary>
-        public RowDefinition StartRow { get; set; }
+        public RowDefinition? StartRow { get; set; }
         
         /// <summary>
         /// Gets or sets the start offset from the top-left corner

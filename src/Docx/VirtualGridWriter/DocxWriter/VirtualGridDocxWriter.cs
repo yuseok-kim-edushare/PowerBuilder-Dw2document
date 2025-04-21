@@ -19,12 +19,12 @@ namespace yuseok.kim.dw2docs.Docx.VirtualGridWriter.DocxWriter
         private bool _documentInitialized = false;
         private string? _writeToPath;
 
-        private XWPFTable? _workingTable; // This might become part of the context or managed differently
+        private XWPFTable _workingTable;
 
         public VirtualGridDocxWriter(VirtualGrid virtualGrid) : base(virtualGrid)
         {
             _document = new XWPFDocument();
-            _workingTable = null;
+            _workingTable = _document.CreateTable();
             _context = new DocxWriterContext(_document);
             _rendererLocator = new RendererLocator();
             RegisterRenderers();
@@ -48,12 +48,10 @@ namespace yuseok.kim.dw2docs.Docx.VirtualGridWriter.DocxWriter
             // TODO: Register other renderers as they are implemented
         }
 
-        [MemberNotNull(nameof(_workingTable))]
         private void InitDocument()
         {
             if (_documentInitialized) return;
 
-            _workingTable = _document.CreateTable();
             _context.CurrentTable = _workingTable;
 
             _documentInitialized = true;

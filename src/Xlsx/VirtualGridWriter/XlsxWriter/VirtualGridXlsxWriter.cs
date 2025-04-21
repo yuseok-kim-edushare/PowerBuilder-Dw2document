@@ -513,7 +513,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
             }
             catch (Exception e)
             {
-                error = $"Unexpected error: {e.Message}";
+                error = $"Unexpected error: {e.Message}\nStackTrace: {e.StackTrace}\nInnerException: {e.InnerException}";
                 Console.WriteLine($"Exception: {e}");
                 return false;
             }

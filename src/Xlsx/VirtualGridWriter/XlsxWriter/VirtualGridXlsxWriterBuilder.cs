@@ -68,7 +68,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
 
                     LogToFile($"Opening existing file for append: {WriteToPath}");
                     // Open stream to read existing workbook
-                    using (var readStream = new FileStream(WriteToPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) // Allow readwrite share temporarily
+                    using (var readStream = new FileStream(WriteToPath!, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) // Allow readwrite share temporarily
                     {
                         workbook = new XSSFWorkbook(readStream);
                     }
@@ -85,14 +85,14 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
 
                     // Open the final stream for writing. NPOI needs to rewrite the whole file.
                     // Use FileMode.Create to overwrite the existing file with the modified workbook.
-                    stream = new FileStream(WriteToPath, FileMode.Create, FileAccess.Write, FileShare.None);
+                    stream = new FileStream(WriteToPath!, FileMode.Create, FileAccess.Write, FileShare.None);
                     LogToFile("Opened file stream for writing (FileMode.Create for append rewrite).");
                 }
                 else // Create new file or overwrite existing if Append is false
                 {
                     LogToFile($"Creating new workbook. File will be created/overwritten at: {WriteToPath}");
                     workbook = CreateWorkbook();
-                    stream = new FileStream(WriteToPath, FileMode.Create, FileAccess.Write, FileShare.None);
+                    stream = new FileStream(WriteToPath!, FileMode.Create, FileAccess.Write, FileShare.None);
                     targetSheetName = AppendToSheetName ?? "Sheet1"; // Use provided name or default
                     LogToFile($"Created stream for new/overwritten file (FileMode.Create). Target sheet: {targetSheetName}");
                 }

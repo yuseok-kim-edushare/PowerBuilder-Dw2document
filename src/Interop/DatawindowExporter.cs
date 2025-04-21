@@ -17,6 +17,26 @@ namespace yuseok.kim.dw2docs.Interop
     /// </summary>
     public class DatawindowExporter
     {
+        // Static constructor to pre-warm XmlSerializer for NPOI types
+        // This helps prevent "An element that returns the type... already exists" errors
+        static DatawindowExporter()
+        {
+            try
+            {
+                Console.WriteLine("Pre-warming XmlSerializer for NPOI types...");
+                // Pre-create serializers for the problematic NPOI types
+                var _ = new System.Xml.Serialization.XmlSerializer(typeof(NPOI.OpenXmlFormats.ExtendedPropertiesDocument));
+                var __ = new System.Xml.Serialization.XmlSerializer(typeof(NPOI.OpenXmlFormats.CT_ExtendedProperties));
+                var ___ = new System.Xml.Serialization.XmlSerializer(typeof(NPOI.OpenXmlFormats.CT_Vector));
+                Console.WriteLine("XmlSerializer pre-warming complete.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: XmlSerializer pre-warming failed: {ex.Message}");
+                // Continue execution even if pre-warming fails
+            }
+        }
+
         /// <summary>
         /// Export datawindow data in JSON format to Excel
         /// </summary>
@@ -72,7 +92,7 @@ namespace yuseok.kim.dw2docs.Interop
             }
             catch (Exception ex)
             {
-                return $"Error: {ex.Message}";
+                return $"Error: {ex.Message}\nStackTrace: {ex.StackTrace}\nInnerException: {ex.InnerException}";
             }
         }
 
@@ -261,8 +281,8 @@ namespace yuseok.kim.dw2docs.Interop
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating VirtualGrid from JSON: {ex.Message}");
-                throw;
+                Console.WriteLine($"[CreateVirtualGridFromJson] Error: {ex.Message}\n{ex.StackTrace}");
+                throw; // rethrow so ExportToExcel can catch it
             }
         }
         

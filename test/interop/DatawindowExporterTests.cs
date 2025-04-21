@@ -9,19 +9,19 @@ namespace yuseok.kim.dw2docs.test.Interop
     public class DatawindowExporterTests
     {
         private const string SimpleJson = "{\n  \"rows\": [\n    { \"Name\": \"Alice\", \"Age\": \"30\" },\n    { \"Name\": \"Bob\", \"Age\": \"25\" }\n  ]\n}";
-        private string _testOutputDir;
+        private string? _testOutputDir;
 
         [TestInitialize]
         public void Setup()
         {
-            _testOutputDir = Path.Combine(TestContext.TestRunDirectory, "TestOutput");
+            _testOutputDir = Path.Combine(TestContext.TestRunDirectory!, "TestOutput");
             Directory.CreateDirectory(_testOutputDir);
         }
 
         [TestCleanup]
         public void Cleanup()
         {
-            if (Directory.Exists(_testOutputDir))
+            if (_testOutputDir != null && Directory.Exists(_testOutputDir))
             {
                 foreach (var file in Directory.GetFiles(_testOutputDir))
                 {
@@ -37,7 +37,7 @@ namespace yuseok.kim.dw2docs.test.Interop
         {
             // Arrange
             var exporter = new DatawindowExporter();
-            string outputPath = Path.Combine(_testOutputDir, "test.xlsx");
+            string outputPath = Path.Combine(_testOutputDir!, "test.xlsx");
 
             // Act
             string result = exporter.ExportToExcel(SimpleJson, outputPath);
@@ -52,7 +52,7 @@ namespace yuseok.kim.dw2docs.test.Interop
         {
             // Arrange
             var exporter = new DatawindowExporter();
-            string outputPath = Path.Combine(_testOutputDir, "test.docx");
+            string outputPath = Path.Combine(_testOutputDir!, "test.docx");
 
             // Act
             string result = exporter.ExportToWord(SimpleJson, outputPath);

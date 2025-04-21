@@ -17,7 +17,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
         <!-- for dynamic loading in interop case like powerbuilder -->
-        <EnableDynamicLoading>true</EnableDynamicLoading>
+        <EnableDynamicLoading>false</EnableDynamicLoading>
     </PropertyGroup>
 
     <ItemGroup>

@@ -1,0 +1,49 @@
+// Example of using the dw_exporter class in PowerBuilder
+
+// In a window or object where you want to export a DataWindow:
+dw_exporter lnv_exporter
+string ls_result
+
+// Create and initialize the exporter
+lnv_exporter = CREATE dw_exporter
+if not lnv_exporter.of_initialize() then
+    MessageBox("Error", "Failed to initialize DataWindow exporter")
+    return
+end if
+
+// Example: Export a DataWindow to Excel
+string ls_xlsx_path = "C:\Reports\MyReport.xlsx"
+ls_result = lnv_exporter.of_export_to_excel(dw_1, ls_xlsx_path, "MySheet")
+
+// Check the result
+if Left(ls_result, 7) = "Success" then
+    MessageBox("Success", ls_result)
+else
+    MessageBox("Error", ls_result)
+end if
+
+// Example: Export a DataWindow to Word
+string ls_docx_path = "C:\Reports\MyReport.docx"
+ls_result = lnv_exporter.of_export_to_word(dw_1, ls_docx_path)
+
+// Check the result
+if Left(ls_result, 7) = "Success" then
+    MessageBox("Success", ls_result)
+else
+    MessageBox("Error", ls_result)
+end if
+
+// Don't forget to destroy the object when done
+DESTROY lnv_exporter
+
+// -------------------------------
+// Important note about PowerBuilder / .NET integration:
+// -------------------------------
+// 1. Make sure the .NET assembly (yuseok.kim.dw2docs.dll) is compiled and accessible
+// 2. You may need to add the assembly to the PowerBuilder .NET assembly list
+//    (Project → Project Properties → .NET Assemblies)
+// 3. No COM registration is needed for direct PowerBuilder / .NET integration
+// 4. Typical PowerBuilder / .NET integration issues:
+//    - Missing assembly references
+//    - Missing or inaccessible classes
+//    - Type conversion issues between PowerBuilder and .NET 

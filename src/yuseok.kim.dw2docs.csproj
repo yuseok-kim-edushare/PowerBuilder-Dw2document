@@ -51,7 +51,14 @@
     <MergeAssemblies Include="$(OutputPath)\publish\ExtendedNumerics.BigDecimal.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\ICSharpCode.SharpZipLib.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\MathNet.Numerics.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.DependencyInjection.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Logging.Abstractions.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Logging.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Options.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Primitives.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.IO.RecyclableMemoryStream.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Win32.SystemEvents.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.Core.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXml4Net.dll" />
@@ -71,7 +78,14 @@
     <MergeAssemblies Include="$(OutputPath)\publish\ExtendedNumerics.BigDecimal.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\ICSharpCode.SharpZipLib.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\MathNet.Numerics.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.DependencyInjection.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Logging.Abstractions.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Logging.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Options.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Primitives.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.IO.RecyclableMemoryStream.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Win32.SystemEvents.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.Core.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXml4Net.dll" />
@@ -79,6 +93,7 @@
     <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.Fonts.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.ImageSharp.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Drawing.Common.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Private.Windows.Core.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Pkcs.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Security.Cryptography.Xml.dll" />
   </ItemGroup>
@@ -91,7 +106,12 @@
     <MergeAssemblies Include="$(OutputPath)\publish\ICSharpCode.SharpZipLib.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\MathNet.Numerics.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Bcl.AsyncInterfaces.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Bcl.HashCode.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.DependencyInjection.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Logging.Abstractions.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Logging.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Options.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Primitives.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.IO.RecyclableMemoryStream.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.Core.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
@@ -100,6 +120,7 @@
     <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.Fonts.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\SixLabors.ImageSharp.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Buffers.dll" />
+    <MergeAssemblies Include="$(OutputPath)\publish\System.Diagnostics.DiagnosticSource.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Drawing.Common.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.IO.Pipelines.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\System.Memory.dll" />

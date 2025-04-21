@@ -91,7 +91,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
                 else // Create new file or overwrite existing if Append is false
                 {
                     LogToFile($"Creating new workbook. File will be created/overwritten at: {WriteToPath}");
-                    workbook = new XSSFWorkbook();
+                    workbook = CreateWorkbook();
                     stream = new FileStream(WriteToPath, FileMode.Create, FileAccess.Write, FileShare.None);
                     targetSheetName = AppendToSheetName ?? "Sheet1"; // Use provided name or default
                     LogToFile($"Created stream for new/overwritten file (FileMode.Create). Target sheet: {targetSheetName}");
@@ -122,6 +122,50 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
             error = null;
             throw new NotImplementedException();
             // Future implementation will go here
+        }
+
+        private XSSFWorkbook CreateWorkbook()
+        {
+            LogToFile("Creating new workbook using byte array template approach");
+            
+            string tempFile = Path.Combine(Path.GetTempPath(), $"excel_temp_{Guid.NewGuid()}.xlsx");
+            try
+            {
+                // Use a hard-coded minimal Excel file to bypass all NPOI issues
+                byte[] minimalExcelFile = MinimalXlsxBytes.GetBytes();
+                
+                // Write the minimal Excel file to disk
+                File.WriteAllBytes(tempFile, minimalExcelFile);
+                
+                // Now try to open it with XSSFWorkbook
+                using (var fs = new FileStream(tempFile, FileMode.Open, FileAccess.Read))
+                {
+                    return new XSSFWorkbook(fs);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogToFile($"Byte array template approach failed: {ex.Message}", ex);
+                
+                // Since all NPOI approaches are failing, provide a clear error message
+                throw new InvalidOperationException(
+                    "All attempts to create an Excel workbook have failed. " +
+                    "This appears to be a bug in the NPOI library with your environment. " + 
+                    "Consider using a pre-created template file or a different Excel library. " +
+                    "Error: " + ex.Message, ex);
+            }
+            finally
+            {
+                // Clean up the temp file
+                try
+                {
+                    if (File.Exists(tempFile))
+                    {
+                        File.Delete(tempFile);
+                    }
+                }
+                catch { /* Ignore cleanup errors */ }
+            }
         }
     }
 }

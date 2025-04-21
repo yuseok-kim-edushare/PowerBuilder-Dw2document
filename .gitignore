@@ -396,3 +396,8 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# ILRepack
+ilrepack.log
+ilrepack.exe
+

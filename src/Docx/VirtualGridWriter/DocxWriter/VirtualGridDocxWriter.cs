@@ -181,8 +181,10 @@ namespace yuseok.kim.dw2docs.Docx.VirtualGridWriter.DocxWriter
                 base.ProcessBands();
                 
                 // Write the document to the file
+                Console.WriteLine($"[DOCX] Attempting to write to {targetPath}");
                 using var stream = File.Create(targetPath);
                 _document.Write(stream);
+                Console.WriteLine($"[DOCX] Write complete. File exists: {File.Exists(targetPath)}");
                 
                 return true;
             }

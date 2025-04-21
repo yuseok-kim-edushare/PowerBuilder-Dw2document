@@ -124,7 +124,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter
             // Future implementation will go here
         }
 
-        private XSSFWorkbook CreateWorkbook()
+        protected virtual XSSFWorkbook CreateWorkbook()
         {
             LogToFile("Creating new workbook using byte array template approach");
             

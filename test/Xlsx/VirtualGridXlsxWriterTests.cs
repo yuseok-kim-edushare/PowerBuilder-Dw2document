@@ -447,5 +447,44 @@ namespace yuseok.kim.dw2docs.test.Xlsx
             }
             */
         }
+
+        [TestMethod]
+        public void BuildFromTemplate_ThrowsNotImplementedException()
+        {
+            var grid = TestVirtualGridFactory.CreateSimpleVirtualGrid();
+            var builder = new VirtualGridXlsxWriterBuilder();
+            Assert.ThrowsException<NotImplementedException>(() =>
+            {
+                builder.BuildFromTemplate(grid, "dummy.xlsx", out string? error);
+            });
+        }
+
+        [TestMethod]
+        public void Build_WhenCreateWorkbookFails_ReturnsErrorAndNullWriter()
+        {
+            // Arrange: Use a subclass to simulate CreateWorkbook failure
+            var grid = TestVirtualGridFactory.CreateSimpleVirtualGrid();
+            var builder = new FaultyVirtualGridXlsxWriterBuilder
+            {
+                WriteToPath = GetUniqueTestFilePath("fail_createworkbook")
+            };
+
+            // Act
+            var writer = builder.Build(grid, out string? error);
+
+            // Assert
+            Assert.IsNull(writer, "Writer should be null when CreateWorkbook fails");
+            Assert.IsNotNull(error, "Error message should not be null");
+            Assert.IsTrue(error.Contains("All attempts to create an Excel workbook have failed"), "Error should mention workbook creation failure");
+        }
+
+        // Helper subclass to simulate CreateWorkbook failure
+        private class FaultyVirtualGridXlsxWriterBuilder : VirtualGridXlsxWriterBuilder
+        {
+            protected override XSSFWorkbook CreateWorkbook()
+            {
+                throw new InvalidOperationException("All attempts to create an Excel workbook have failed. Simulated failure.");
+            }
+        }
     }
 } 

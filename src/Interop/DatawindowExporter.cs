@@ -107,7 +107,7 @@ namespace yuseok.kim.dw2docs.Interop
                 }
 
                 // Write to Word
-                bool success = writer.WriteEntireGrid("Document", out error);
+                bool success = writer.WriteEntireGrid(outputPath, out error);
                 
                 // Dispose writer if it implements IDisposable
                 if (writer is IDisposable disposable)
@@ -118,6 +118,18 @@ namespace yuseok.kim.dw2docs.Interop
                 if (!success)
                 {
                     return $"Error: {error}";
+                }
+
+                // Debug: Print ControlAttributes keys
+                var controlAttributesProp = typeof(VirtualGrid).GetProperty("ControlAttributes");
+                var controlAttributes = controlAttributesProp?.GetValue(grid) as IDictionary<string, object>;
+                if (controlAttributes != null)
+                {
+                    Console.WriteLine("[ExportToWord] ControlAttributes keys: " + string.Join(", ", controlAttributes.Keys));
+                }
+                else
+                {
+                    Console.WriteLine("[ExportToWord] ControlAttributes is null");
                 }
 
                 return $"Success: Word file created at {outputPath}";
@@ -236,8 +248,14 @@ namespace yuseok.kim.dw2docs.Interop
                 var method = typeof(VirtualGrid).GetMethod("SetAttributes", 
                     System.Reflection.BindingFlags.NonPublic | 
                     System.Reflection.BindingFlags.Instance);
-                    
                 method?.Invoke(grid, new object[] { attributes });
+
+                // Also set ControlAttributes property if available
+                var controlAttributesProp = typeof(VirtualGrid).GetProperty("ControlAttributes");
+                if (controlAttributesProp != null && controlAttributesProp.CanWrite)
+                {
+                    controlAttributesProp.SetValue(grid, attributes);
+                }
                 
                 return grid;
             }

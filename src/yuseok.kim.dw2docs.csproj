@@ -55,7 +55,6 @@
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Logging.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Options.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Primitives.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.IO.RecyclableMemoryStream.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Win32.SystemEvents.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
@@ -77,7 +76,6 @@
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Logging.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Options.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Primitives.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.IO.RecyclableMemoryStream.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Win32.SystemEvents.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
@@ -101,7 +99,6 @@
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Logging.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Options.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.Extensions.Primitives.dll" />
-    <MergeAssemblies Include="$(OutputPath)\publish\Microsoft.IO.RecyclableMemoryStream.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OOXML.dll" />
     <MergeAssemblies Include="$(OutputPath)\publish\NPOI.OpenXml4Net.dll" />

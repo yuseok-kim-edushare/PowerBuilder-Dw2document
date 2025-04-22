@@ -6,7 +6,7 @@ This project inspired from Appeon's [Dw2Doc example Project](https://github.com/
 
 - We want use in production environment
 - but appeon's original repository has multiple csproj and complex user-object structure
-- SO, to simplifying distribution and manaing and avoiding dll collision from other modules, Single Integrated DLL is each project result is better choice
+- SO, to simplifying distribution and manaing and avoiding dll collision from other modules, Single Integrated DLL is better choice
 
 ## Introduce
 - We use Virtual Grid Idea to convert datawindow to other format, this is appeon's idea
@@ -16,7 +16,7 @@ This project inspired from Appeon's [Dw2Doc example Project](https://github.com/
 - We use ILRepack to bundling dll
 
 ## Acknowledgements
-1. **Appeon's primary idea repository encourage our challenge**
+1. **Appeon's primary idea [repository](https://github.com/Appeon/PowerBuilder-Dw2Doc-Example) encourage our challenge**
 2. **[NPOI](https://github.com/nissl-lab/npoi)**
 3. **[ILRepack](https://github.com/gluck/il-repack)**
 4. **Dotnet Foundation and Microsoft**
@@ -48,6 +48,10 @@ This project inspired from Appeon's [Dw2Doc example Project](https://github.com/
    - Go to ".NET Assemblies" tab
    - Click "Add"
    - Browse to the location of yuseok.kim.dw2docs.dll
+      - dll will be located on
+      {repository_root}\bin\{target_framewokrs}
+      - example
+          - C:\Source\PowerBuilder-Dw2document\bin\net481\yuseok.kim.dw2docs.dll
    - Select the assembly and click "Open"
    - Click "OK" to save the project properties
 
@@ -82,6 +86,9 @@ DESTROY lnv_exporter
 ## Troubleshooting
 
 If you encounter issues with the PowerBuilder/.NET integration:
+
+**our dll's defalut setting is create log file into C:\temp** </br>
+if you encounter issue, you can check **C:\temp\Dw2Doc_ExcelError.log**
 
 1. Verify the .NET assembly is properly built and accessible
 2. Check that the assembly is added to your PowerBuilder project

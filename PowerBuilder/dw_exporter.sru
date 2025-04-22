@@ -1,4 +1,5 @@
 $PBExportHeader$dw_exporter.sru
+
 forward
 global type dw_exporter from nonvisualobject
 end type
@@ -19,7 +20,11 @@ public function boolean of_initialize ()
 public function string of_export_to_excel (datawindow adw_source, string as_output_path, string as_sheet_name)
 public function string of_export_to_word (datawindow adw_source, string as_output_path)
 private function string of_datawindow_to_json (datawindow adw_source)
+private function string of_datawindow_structure_to_json (datawindow adw_source)
+private function string of_datawindow_rows_to_json (datawindow adw_source)
+private function string of_datawindow_to_virtualgrid_json (datawindow adw_source)
 private function string json_escape(string value)
+private function string json_null_if_special(string value)
 public subroutine of_seterrorhandler (powerobject apo_newhandler, string as_newevent)
 end prototypes
 
@@ -47,9 +52,9 @@ try
         end if
     end if
     
-    // Convert DataWindow to JSON data
+    // Convert DataWindow to virtual grid JSON data
     string ls_json_data
-    ls_json_data = of_datawindow_to_json(adw_source)
+    ls_json_data = of_datawindow_to_virtualgrid_json(adw_source)
 	 
 	// export json into text file for debugging
 	integer li_file
@@ -62,8 +67,7 @@ try
     
     // Export to Excel using the nvo_datawindowexporter
     string ls_result
-    string ls_path = "C:\Temp\test.xlsx"
-    ls_result = inv_exporter.of_exporttoexcel(ls_json_data, ls_path, as_sheet_name)
+    ls_result = inv_exporter.of_exporttoexcel(ls_json_data, as_output_path, as_sheet_name)
     
     MessageBox("Debug", "Result: " + ls_result)
     
@@ -82,9 +86,9 @@ try
         end if
     end if
     
-    // Convert DataWindow to JSON data
+    // Convert DataWindow to virtual grid JSON data
     string ls_json_data
-    ls_json_data = of_datawindow_to_json(adw_source)
+    ls_json_data = of_datawindow_to_virtualgrid_json(adw_source)
     
     // Export to Word using the nvo_datawindowexporter
     string ls_result
@@ -104,171 +108,364 @@ end if
 end subroutine
 
 private function string of_datawindow_to_json (datawindow adw_source);
-// Convert DataWindow to JSON with cell properties, skipping empty rows
-string ls_json, ls_error
-long ll_rows, ll_row
-string ls_colname, ls_value
+// Export DataWindow to JSON with structure and data
+string ls_json
 
-try
-    // Start JSON object
-    ls_json = "{";
-    
-    // Add metadata
-    ls_json += '"metadata":{';
-    ls_json += '"name":"' + adw_source.Describe("DataWindow.Name") + '",';
-    ls_json += '"title":"' + adw_source.Describe("DataWindow.Title") + '"';
-    ls_json += '},';
-    
-    // Get row count
-    ll_rows = adw_source.RowCount()
-    
-    // Add data rows
-    ls_json += '"rows":[';
-    
-    boolean lb_first_row = true
-    for ll_row = 1 to ll_rows
-        // Prepare to build the row JSON
-        string ls_row_json
-        boolean lb_first_column = true
-        ls_row_json = "{";
-        
-        // Get column names dynamically
-        string ls_column_list, ls_column
-        integer li_pos_start = 1, li_pos_end
-        ls_column_list = adw_source.Describe("DataWindow.Objects")
-        
-        do while li_pos_start > 0
-            li_pos_end = Pos(ls_column_list, "~t", li_pos_start)
-            if li_pos_end = 0 then
-                ls_column = Mid(ls_column_list, li_pos_start)
-                li_pos_start = 0
-            else
-                ls_column = Mid(ls_column_list, li_pos_start, li_pos_end - li_pos_start)
-                li_pos_start = li_pos_end + 1
-            end if
-            
-            // Check if it's a column
-            string ls_type
-            ls_type = adw_source.Describe(ls_column + ".Type")
-            if ls_type = "column" then
-                // Get column value
-                ls_value = String(adw_source.GetItemString(ll_row, ls_column))
-                if IsNull(ls_value) then ls_value = ""
-                
-                // Get cell properties
-                string ls_font_face, ls_font_height, ls_font_weight, ls_font_italic, ls_font_underline, ls_font_strikethrough
-                string ls_color, ls_bgcolor, ls_alignment, ls_format
-                
-                ls_font_face = adw_source.Describe(ls_column + ".Font.Face")
-                ls_font_height = adw_source.Describe(ls_column + ".Font.Height")
-                ls_font_weight = adw_source.Describe(ls_column + ".Font.Weight")
-                ls_font_italic = adw_source.Describe(ls_column + ".Font.Italic")
-                ls_font_underline = adw_source.Describe(ls_column + ".Font.Underline")
-                ls_font_strikethrough = adw_source.Describe(ls_column + ".Font.Strikethrough")
-                ls_color = adw_source.Describe(ls_column + ".Color")
-                ls_bgcolor = adw_source.Describe(ls_column + ".Background.Color")
-                ls_alignment = adw_source.Describe(ls_column + ".Alignment")
-                ls_format = adw_source.Describe(ls_column + ".Format")
-                
-                // Only add the column if it has a value or at least one property (not all are empty)
-                boolean lb_has_data = ls_value <> "" or ls_font_face <> "" or ls_font_height <> "" or ls_font_weight <> "" or ls_font_italic <> "" or ls_font_underline <> "" or ls_font_strikethrough <> "" or ls_color <> "" or ls_bgcolor <> "" or ls_alignment <> "" or ls_format <> ""
-                if lb_has_data then
-                    if not lb_first_column then ls_row_json += ","
-                    lb_first_column = false
-                    // Add to JSON (nested object)
-                    ls_row_json += '"' + ls_column + '":{';
-                    ls_row_json += '"value":"' + json_escape(ls_value) + '",';
-                    ls_row_json += '"font_face":"' + json_escape(ls_font_face) + '",';
-                    ls_row_json += '"font_height":"' + json_escape(ls_font_height) + '",';
-                    ls_row_json += '"font_weight":"' + json_escape(ls_font_weight) + '",';
-                    ls_row_json += '"font_italic":"' + json_escape(ls_font_italic) + '",';
-                    ls_row_json += '"font_underline":"' + json_escape(ls_font_underline) + '",';
-                    ls_row_json += '"font_strikethrough":"' + json_escape(ls_font_strikethrough) + '",';
-                    ls_row_json += '"color":"' + json_escape(ls_color) + '",';
-                    ls_row_json += '"background_color":"' + json_escape(ls_bgcolor) + '",';
-                    ls_row_json += '"alignment":"' + json_escape(ls_alignment) + '",';
-                    ls_row_json += '"format":"' + json_escape(ls_format) + '"';
-                    ls_row_json += "}"
-                end if
-            end if
-        loop
-        
-        ls_row_json += "}"
-        // Only add the row if it has at least one column
-        if not lb_first_column then
-            if not lb_first_row then ls_json += ","
-            lb_first_row = false
-            ls_json += ls_row_json
+// Add metadata
+ls_json = "{"
+ls_json += '"metadata":{'
+ls_json += '"name":"' + json_escape(adw_source.Describe("DataWindow.Name")) + '",'
+ls_json += '"title":"' + json_escape(adw_source.Describe("DataWindow.Title")) + '"'
+ls_json += '},'
+
+// Add structure
+ls_json += '"structure":' + of_datawindow_structure_to_json(adw_source) + ','
+
+// Add data rows
+ls_json += '"rows":' + of_datawindow_rows_to_json(adw_source)
+
+ls_json += "}"
+
+return ls_json
+end function
+
+private function string of_datawindow_structure_to_json (datawindow adw_source);
+// Export DataWindow structure (columns, objects, bands) to JSON
+string ls_json, ls_objects, ls_objname, ls_type, ls_coltype, ls_expr, ls_band
+string ls_columns, ls_objs, ls_bands
+boolean lb_first
+
+// --- Columns ---
+ls_columns = "["
+ls_objects = adw_source.Describe("DataWindow.Objects")
+string ls_objlist[]
+integer li_pos_start = 1, li_pos_end, li_colcount = 0
+
+// Split objects by tab
+do while li_pos_start > 0
+    li_pos_end = Pos(ls_objects, "~t", li_pos_start)
+    if li_pos_end = 0 then
+        ls_objname = Mid(ls_objects, li_pos_start)
+        li_pos_start = 0
+    else
+        ls_objname = Mid(ls_objects, li_pos_start, li_pos_end - li_pos_start)
+        li_pos_start = li_pos_end + 1
+    end if
+
+    ls_type = adw_source.Describe(ls_objname + ".Type")
+    if ls_type = "column" or ls_type = "compute" then
+        if li_colcount > 0 then ls_columns += ","
+        ls_columns += "{"
+        ls_columns += '"name":"' + json_escape(ls_objname) + '",'
+        ls_columns += '"type":"' + json_escape(adw_source.Describe(ls_objname + ".ColType")) + '"'
+        if ls_type = "compute" then
+            ls_expr = adw_source.Describe(ls_objname + ".Expression")
+            ls_columns += ',"expression":"' + json_escape(ls_expr) + '"'
         end if
-    next
-    
-    ls_json += "]";
-    
-    // Close the main JSON object
-    ls_json += "}";
-    
-    return ls_json
-catch (Exception le_ex)
-    MessageBox("JSON Conversion Error", le_ex.getMessage())
-    return "{}"
-end try
+        ls_columns += ',"format":' + json_null_if_special(adw_source.Describe(ls_objname + ".Format")) + '"'
+        ls_columns += "}"
+        li_colcount++
+    end if
+loop
+ls_columns += "]"
+
+// --- Objects ---
+ls_objs = "["
+li_pos_start = 1
+li_pos_end = 0
+integer li_objcount = 0
+do while li_pos_start > 0
+    li_pos_end = Pos(ls_objects, "~t", li_pos_start)
+    if li_pos_end = 0 then
+        ls_objname = Mid(ls_objects, li_pos_start)
+        li_pos_start = 0
+    else
+        ls_objname = Mid(ls_objects, li_pos_start, li_pos_end - li_pos_start)
+        li_pos_start = li_pos_end + 1
+    end if
+
+    ls_type = adw_source.Describe(ls_objname + ".Type")
+    if li_objcount > 0 then ls_objs += ","
+    ls_objs += "{"
+    ls_objs += '"name":"' + json_escape(ls_objname) + '",'
+    ls_objs += '"type":"' + json_escape(ls_type) + '"'
+    // Add position/size if available
+    string ls_x, ls_y, ls_w, ls_h
+    ls_x = adw_source.Describe(ls_objname + ".X")
+    ls_y = adw_source.Describe(ls_objname + ".Y")
+    ls_w = adw_source.Describe(ls_objname + ".Width")
+    ls_h = adw_source.Describe(ls_objname + ".Height")
+    ls_objs += ',"x":' + json_null_if_special(ls_x)
+    ls_objs += ',"y":' + json_null_if_special(ls_y)
+    ls_objs += ',"width":' + json_null_if_special(ls_w)
+    ls_objs += ',"height":' + json_null_if_special(ls_h)
+    // Add font/color if available
+    ls_objs += ',"font_face":' + json_null_if_special(adw_source.Describe(ls_objname + ".Font.Face")) + '"'
+    ls_objs += ',"font_height":' + json_null_if_special(adw_source.Describe(ls_objname + ".Font.Height")) + '"'
+    ls_objs += ',"color":' + json_null_if_special(adw_source.Describe(ls_objname + ".Color")) + '"'
+    ls_objs += ',"background_color":' + json_null_if_special(adw_source.Describe(ls_objname + ".Background.Color")) + '"'
+    ls_objs += "}"
+    li_objcount++
+loop
+ls_objs += "]"
+
+// --- Bands ---
+ls_bands = "["
+string ls_bandnames[]
+ls_bandnames[1] = "header"
+ls_bandnames[2] = "detail"
+ls_bandnames[3] = "footer"
+ls_bandnames[4] = "summary"
+integer i
+for i = 1 to UpperBound(ls_bandnames)
+    if i > 1 then ls_bands += ","
+    ls_band = ls_bandnames[i]
+    ls_bands += "{"
+    ls_bands += '"name":"' + json_escape(ls_band) + '"'
+    // You can add more band properties if needed
+    ls_bands += "}"
+next
+ls_bands += "]"
+
+// --- Combine all ---
+ls_json = "{"
+ls_json += '"columns":' + ls_columns + ','
+ls_json += '"objects":' + ls_objs + ','
+ls_json += '"bands":' + ls_bands
+ls_json += "}"
+
+return ls_json
+end function
+
+private function string of_datawindow_rows_to_json (datawindow adw_source);
+// Export DataWindow rows (data only) to JSON
+string ls_json, ls_column, ls_value, ls_visualobjects, ls_dwtype
+long ll_rows, ll_row
+boolean lb_first_column
+
+ll_rows = adw_source.RowCount()
+ls_json = "["
+
+for ll_row = 1 to ll_rows
+    if ll_row > 1 then ls_json += ","
+    ls_json += "{"
+    lb_first_column = true
+
+    // Get column/object names dynamically
+    ls_visualobjects = adw_source.Describe("DataWindow.VisualObjects")
+    integer li_pos_start, li_pos_end
+    li_pos_start = 1
+    li_pos_end = 0
+
+    do while li_pos_start > 0
+        li_pos_end = Pos(ls_visualobjects, "~t", li_pos_start)
+        if li_pos_end = 0 then
+            ls_column = Mid(ls_visualobjects, li_pos_start)
+            li_pos_start = 0
+        else
+            ls_column = Mid(ls_visualobjects, li_pos_start, li_pos_end - li_pos_start)
+            li_pos_start = li_pos_end + 1
+        end if
+
+        ls_dwtype = adw_source.Describe(ls_column + ".Type")
+        if ls_dwtype = "column" or ls_dwtype = "compute" then
+            string ls_coltype
+            ls_coltype = adw_source.Describe(ls_column + ".ColType")
+            ls_value = ""
+            if ll_row <= ll_rows then
+                choose case Left(ls_coltype, 5)
+                    case "char("
+                        ls_value = adw_source.GetItemString(ll_row, ls_column)
+                        if IsNull(ls_value) then ls_value = ""
+                    case "date"
+                        date ld_value
+                        ld_value = adw_source.GetItemDate(ll_row, ls_column)
+                        if not IsNull(ld_value) then ls_value = String(ld_value)
+                    case "datet"
+                        datetime ldt_value
+                        ldt_value = adw_source.GetItemDateTime(ll_row, ls_column)
+                        if not IsNull(ldt_value) then ls_value = String(ldt_value)
+                    case "decim", "numbe", "long", "ulong", "int", "uint", "real", "doubl"
+                        double ldb_value
+                        ldb_value = adw_source.GetItemNumber(ll_row, ls_column)
+                        if not IsNull(ldb_value) then ls_value = String(ldb_value)
+                    case else
+                        ls_value = String(adw_source.GetItemString(ll_row, ls_column))
+                        if IsNull(ls_value) then ls_value = ""
+                end choose
+            end if
+
+            if not lb_first_column then ls_json += ","
+            lb_first_column = false
+            ls_json += '"' + json_escape(ls_column) + '":"' + json_escape(ls_value) + '"'
+        end if
+    loop
+
+    ls_json += "}"
+next
+
+ls_json += "]"
+return ls_json
 end function
 
 private function string json_escape(string value);
+// Properly escape strings for JSON according to the spec
+// Only escape the characters that MUST be escaped in JSON:
+// Backslash, double quote, and control chars (< ASCII 32)
+
+if IsNull(value) then return ""
+
 string ls_result
-integer li_pos
+integer i, len
+len = Len(value)
+ls_result = ""
 
-ls_result = value
-
-// Escape backslash
-li_pos = Pos(ls_result, "~\\")
-do while li_pos > 0
-    ls_result = Left(ls_result, li_pos - 1) + "~\\~\\" + Mid(ls_result, li_pos + 1)
-    li_pos = Pos(ls_result, "~\\", li_pos + 2)
-loop
-
-// Escape double quote
-li_pos = Pos(ls_result, '~"')
-do while li_pos > 0
-    ls_result = Left(ls_result, li_pos - 1) + "~\\~"" + Mid(ls_result, li_pos + 1)
-    li_pos = Pos(ls_result, '~"', li_pos + 3)
-loop
-
-// Escape newline
-li_pos = Pos(ls_result, Char(10))
-do while li_pos > 0
-    ls_result = Left(ls_result, li_pos - 1) + "\\n" + Mid(ls_result, li_pos + 1)
-    li_pos = Pos(ls_result, Char(10), li_pos + 2)
-loop
-
-// Escape carriage return
-li_pos = Pos(ls_result, Char(13))
-do while li_pos > 0
-    ls_result = Left(ls_result, li_pos - 1) + "\\r" + Mid(ls_result, li_pos + 1)
-    li_pos = Pos(ls_result, Char(13), li_pos + 2)
-loop
-
-// Escape tab
-li_pos = Pos(ls_result, Char(9))
-do while li_pos > 0
-    ls_result = Left(ls_result, li_pos - 1) + "\\t" + Mid(ls_result, li_pos + 1)
-    li_pos = Pos(ls_result, Char(9), li_pos + 2)
-loop
-
-// Escape other control characters (ASCII < 32 except for \n, \r, \t)
-integer i
-for i = 1 to Len(ls_result)
+// Process the string one character at a time for proper JSON escaping
+for i = 1 to len
+    string ch
+    ch = Mid(value, i, 1)
     integer ascii_val
-    ascii_val = Asc(Mid(ls_result, i, 1))
-    if ascii_val < 32 and ascii_val <> 10 and ascii_val <> 13 and ascii_val <> 9 then
-        string hex = String(ascii_val, "~x04")
-        ls_result = Left(ls_result, i - 1) + "\\u00" + Right("0" + String(ascii_val, "~x2"), 2) + Mid(ls_result, i + 1)
-        // After replacement, move i forward by 5 (\u00XX is 6 chars, but we replaced 1)
-        i += 5
-    end if
+    ascii_val = Asc(ch)
+    
+    choose case ascii_val
+        // Escape the backslash
+        case 92 // '\'
+            ls_result += "\\"
+        // Escape the double quote    
+        case 34 // '"'
+            ls_result += "\\"+"~""
+        // Handle ASCII control characters
+        case 0 to 31
+            choose case ascii_val
+                case 8  // Backspace
+                    ls_result += "\\b"
+                case 9  // Tab
+                    ls_result += "\\t"
+                case 10 // Newline
+                    ls_result += "\\n"
+                case 12 // Form feed
+                    ls_result += "\\f"
+                case 13 // Carriage return
+                    ls_result += "\\r"
+                case else
+                    // Other control chars use Unicode escape \u00XX
+                    string hex
+                    hex = Right("0" + String(ascii_val, "~~h"), 2)
+                    ls_result += "\\u00" + hex
+            end choose
+        case else
+            // Normal characters are added unchanged
+            ls_result += ch
+    end choose
 next
 
 return ls_result
+end function
+
+private function string json_null_if_special(string value);
+if IsNull(value) or value = "?" or value = "!" then
+    return "null"
+else
+    return '"' + json_escape(value) + '"'
+end if
+end function
+
+private function string of_datawindow_to_virtualgrid_json (datawindow adw_source);
+// Build a JSON string representing a virtual grid for your C# DLL
+string ls_json, ls_columns, ls_rows, ls_bands, ls_cellattrs
+integer i, j, col_count, row_count
+string col_name, col_type, col_width, col_format
+string row_json, cell_value, band_name
+string cell_attr_json, cell_name
+string ls_font, ls_fontsize, ls_fontweight, ls_underline, ls_italics, ls_strikethrough, ls_align, ls_fontcolor, ls_bgcolor
+
+// --- Columns ---
+ls_columns = "["
+col_count = Integer(adw_source.Describe("DataWindow.Column.Count"))
+for i = 1 to col_count
+    if i > 1 then ls_columns += ","
+    col_name = adw_source.Describe("#" + String(i) + ".Name")
+    col_type = adw_source.Describe(col_name + ".ColType")
+    col_width = adw_source.Describe(col_name + ".Width")
+    col_format = adw_source.Describe(col_name + ".Format")
+    ls_columns += '{'
+    ls_columns += '"name":"' + json_escape(col_name) + '",'
+    ls_columns += '"type":"' + json_escape(col_type) + '",'
+    ls_columns += '"width":' + json_null_if_special(col_width) + ','
+    ls_columns += '"format":' + json_null_if_special(col_format) + '"'
+    ls_columns += '}'
+next
+ls_columns += "]"
+
+// --- Bands ---
+ls_bands = '[{"name":"header"},{"name":"detail"},{"name":"footer"},{"name":"summary"}]'
+
+// --- Rows and Cell Attributes ---
+ls_rows = "["
+ls_cellattrs = "{"
+row_count = adw_source.RowCount()
+for i = 1 to row_count
+    if i > 1 then ls_rows += ","
+    row_json = "{"
+    for j = 1 to col_count
+        col_name = adw_source.Describe("#" + String(j) + ".Name")
+        if j > 1 then row_json += ","
+        // Get value as string, handle nulls
+        cell_value = adw_source.GetItemString(i, col_name)
+        if IsNull(cell_value) then cell_value = ""
+        row_json += '"' + json_escape(col_name) + '":"' + json_escape(cell_value) + '"'
+
+        // --- Cell Attributes ---
+        cell_name = "cell_" + String(i - 1) + "_" + String(j - 1)
+        if not (i = 1 and j = 1) then ls_cellattrs += ","
+        cell_attr_json = '{'
+        cell_attr_json += '"text":"' + json_escape(cell_value) + '",'
+        cell_attr_json += '"is_visible":true'
+        // Font
+        ls_font = adw_source.Describe(col_name + ".Font.Face")
+        if ls_font <> "" then cell_attr_json += ',"font":' + json_null_if_special(ls_font)
+        // Font size
+        ls_fontsize = adw_source.Describe(col_name + ".Font.Height")
+        if ls_fontsize <> "" then cell_attr_json += ',"font_size":' + json_null_if_special(ls_fontsize)
+        // Font weight
+        ls_fontweight = adw_source.Describe(col_name + ".Font.Weight")
+        if ls_fontweight <> "" then cell_attr_json += ',"font_weight":' + json_null_if_special(ls_fontweight)
+        // Underline
+        ls_underline = adw_source.Describe(col_name + ".Font.Underline")
+        if ls_underline = "1" then cell_attr_json += ',"underline":true' else cell_attr_json += ',"underline":false'
+        // Italics
+        ls_italics = adw_source.Describe(col_name + ".Font.Italic")
+        if ls_italics = "1" then cell_attr_json += ',"italics":true' else cell_attr_json += ',"italics":false'
+        // Strikethrough
+        ls_strikethrough = adw_source.Describe(col_name + ".Font.Strikethrough")
+        if ls_strikethrough = "1" then cell_attr_json += ',"strikethrough":true' else cell_attr_json += ',"strikethrough":false'
+        // Alignment
+        ls_align = adw_source.Describe(col_name + ".Alignment")
+        if ls_align <> "" then cell_attr_json += ',"alignment":"' + Lower(ls_align) + '"'
+        // Font color
+        ls_fontcolor = adw_source.Describe(col_name + ".Color")
+        if ls_fontcolor <> "" then cell_attr_json += ',"font_color":' + json_null_if_special(ls_fontcolor)
+        // Background color
+        ls_bgcolor = adw_source.Describe(col_name + ".Background.Color")
+        if ls_bgcolor <> "" then cell_attr_json += ',"background_color":' + json_null_if_special(ls_bgcolor)
+        cell_attr_json += '}'
+        ls_cellattrs += '"' + cell_name + '":' + cell_attr_json
+    next
+    row_json += '}'
+    ls_rows += row_json
+next
+ls_rows += "]"
+ls_cellattrs += "}"
+
+// --- Combine all ---
+ls_json = "{"
+ls_json += '"columns":' + ls_columns + ','
+ls_json += '"bands":' + ls_bands + ','
+ls_json += '"rows":' + ls_rows + ','
+ls_json += '"cell_attributes":' + ls_cellattrs
+ls_json += "}"
+
+return ls_json
 end function
 
 event ue_error();

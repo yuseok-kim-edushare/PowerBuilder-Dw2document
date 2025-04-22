@@ -152,68 +152,91 @@ namespace yuseok.kim.dw2docs.Interop
                 var jsonDoc = JsonDocument.Parse(jsonData);
                 var root = jsonDoc.RootElement;
 
-                // Initialize grid components
-                var rows = new List<RowDefinition>();
+                // --- Parse columns ---
                 var columns = new List<ColumnDefinition>();
-                var bands = new List<BandRows>();
-                
-                // Dictionary to store cell values by cell name
-                var cellValues = new Dictionary<string, string>();
-                
-                // Process rows from JSON
-                if (root.TryGetProperty("rows", out var rowsElement))
+                var columnNames = new List<string>();
+                if (root.TryGetProperty("columns", out var columnsElement))
                 {
-                    // First pass: create column definitions
-                    var columnNames = new HashSet<string>();
-                    foreach (var row in rowsElement.EnumerateArray())
+                    foreach (var col in columnsElement.EnumerateArray())
                     {
-                        foreach (var prop in row.EnumerateObject())
+                        int size = col.TryGetProperty("width", out var widthProp) && widthProp.TryGetInt32(out int w) ? w : 100;
+                        var colDef = new ColumnDefinition { Size = size };
+                        columns.Add(colDef);
+                        if (col.TryGetProperty("name", out var nameProp))
+                            columnNames.Add(nameProp.GetString() ?? $"col{columns.Count - 1}");
+                        else
+                            columnNames.Add($"col{columns.Count - 1}");
+                    }
+                }
+                else
+                {
+                    // Fallback: infer columns from rows
+                    if (root.TryGetProperty("rows", out var rowsElement))
+                    {
+                        var colSet = new HashSet<string>();
+                        foreach (var row in rowsElement.EnumerateArray())
                         {
-                            columnNames.Add(prop.Name);
+                            foreach (var prop in row.EnumerateObject())
+                                colSet.Add(prop.Name);
                         }
+                        columnNames.AddRange(colSet);
+                        foreach (var _ in columnNames)
+                            columns.Add(new ColumnDefinition { Size = 100 });
                     }
-                    
-                    // Create column definitions
-                    int colIndex = 0;
-                    foreach (var colName in columnNames)
+                }
+
+                // --- Parse bands ---
+                var bands = new List<BandRows>();
+                var bandRowsDict = new Dictionary<string, List<RowDefinition>>();
+                if (root.TryGetProperty("bands", out var bandsElement))
+                {
+                    foreach (var band in bandsElement.EnumerateArray())
                     {
-                        columns.Add(new ColumnDefinition { Size = 100 });
-                        colIndex++;
+                        var bandName = band.TryGetProperty("name", out var nameProp) ? nameProp.GetString() ?? "detail" : "detail";
+                        bandRowsDict[bandName] = new List<RowDefinition>();
                     }
-                    
-                    // Second pass: create rows and add cells
+                }
+                else
+                {
+                    bandRowsDict["detail"] = new List<RowDefinition>();
+                }
+
+                // --- Parse rows ---
+                var rows = new List<RowDefinition>();
+                var cellValues = new Dictionary<string, string>();
+                if (root.TryGetProperty("rows", out var rowsElement2))
+                {
                     int rowIndex = 0;
-                    foreach (var row in rowsElement.EnumerateArray())
+                    foreach (var row in rowsElement2.EnumerateArray())
                     {
-                        // Create row
-                        var rowDef = new RowDefinition { Size = 30, BandName = "detail" };
+                        // Band assignment (default to 'detail')
+                        string bandName = "detail";
+                        if (row.TryGetProperty("band", out var bandProp))
+                            bandName = bandProp.GetString() ?? "detail";
+                        var rowDef = new RowDefinition { Size = 30, BandName = bandName };
                         rows.Add(rowDef);
-                        
+                        if (!bandRowsDict.ContainsKey(bandName))
+                            bandRowsDict[bandName] = new List<RowDefinition>();
+                        bandRowsDict[bandName].Add(rowDef);
+
                         // Process cells
-                        colIndex = 0;
+                        int colIndex = 0;
                         foreach (var colName in columnNames)
                         {
                             if (row.TryGetProperty(colName, out var value))
                             {
-                                // Get the cell value as string
                                 string? cellValue = value.GetString();
                                 string cellName = $"cell_{rowIndex}_{colIndex}";
-                                
-                                // Store the value for later use
                                 cellValues[cellName] = cellValue ?? "";
-                                
-                                // Create a text object for the cell
                                 var textObject = new Dw2DObject(
-                                    cellName,      // name
-                                    "detail",      // band
-                                    colIndex * 100, // x
-                                    rowIndex * 30,  // y
-                                    100,           // width
-                                    30);           // height
-                                
-                                // Create cell and add to row
+                                    cellName,
+                                    bandName,
+                                    colIndex * 100,
+                                    rowIndex * 30,
+                                    columns.Count > colIndex ? columns[colIndex].Size : 100,
+                                    30);
                                 var cell = new VirtualCell(textObject);
-                                cell.OwningColumn = columns[colIndex];
+                                cell.OwningColumn = columns.Count > colIndex ? columns[colIndex] : null;
                                 cell.OwningRow = rowDef;
                                 rowDef.Objects.Add(cell);
                             }
@@ -222,33 +245,88 @@ namespace yuseok.kim.dw2docs.Interop
                         rowIndex++;
                     }
                 }
-                
-                // Create band rows definition
-                var detailBand = new BandRows("detail", rows);
-                bands.Add(detailBand);
-                
-                // Create cell repository
-                var cellRepo = CreateCellRepository(rows);
-                
-                // Create the VirtualGrid
-                var grid = new VirtualGrid(rows, columns, bands, cellRepo, DwType.Default);
-                
-                // Add attributes to the grid
-                var attributes = new Dictionary<string, DwObjectAttributesBase>();
-                
-                // Create attributes based on stored cell values
-                foreach (var cellEntry in cellValues)
+
+                // --- Create BandRows ---
+                foreach (var kvp in bandRowsDict)
                 {
-                    attributes[cellEntry.Key] = new DwTextAttributes 
-                    { 
-                        Text = cellEntry.Value,
-                        IsVisible = true
-                    };
+                    bands.Add(new BandRows(kvp.Key, kvp.Value));
                 }
-                
+
+                // --- Create cell repository ---
+                var cellRepo = CreateCellRepository(rows);
+
+                // --- Create the VirtualGrid ---
+                var grid = new VirtualGrid(rows, columns, bands, cellRepo, DwType.Default);
+
+                // --- Parse cell_attributes (optional) ---
+                var attributes = new Dictionary<string, DwObjectAttributesBase>();
+                if (root.TryGetProperty("cell_attributes", out var cellAttrsElement))
+                {
+                    foreach (var cellAttr in cellAttrsElement.EnumerateObject())
+                    {
+                        var attrObj = cellAttr.Value;
+                        var attr = new DwTextAttributes();
+                        if (attrObj.TryGetProperty("text", out var textProp))
+                            attr.Text = textProp.GetString();
+                        if (attrObj.TryGetProperty("is_visible", out var visProp))
+                            attr.IsVisible = visProp.GetBoolean();
+                        if (attrObj.TryGetProperty("font", out var fontProp))
+                            attr.FontFace = fontProp.GetString();
+                        if (attrObj.TryGetProperty("font_size", out var fontSizeProp) && fontSizeProp.TryGetByte(out byte fontSize))
+                            attr.FontSize = fontSize;
+                        if (attrObj.TryGetProperty("font_weight", out var fontWeightProp) && fontWeightProp.TryGetInt16(out short fontWeight))
+                            attr.FontWeight = fontWeight;
+                        if (attrObj.TryGetProperty("underline", out var underlineProp))
+                            attr.Underline = underlineProp.GetBoolean();
+                        if (attrObj.TryGetProperty("italics", out var italicsProp))
+                            attr.Italics = italicsProp.GetBoolean();
+                        if (attrObj.TryGetProperty("strikethrough", out var strikeProp))
+                            attr.Strikethrough = strikeProp.GetBoolean();
+                        if (attrObj.TryGetProperty("alignment", out var alignProp))
+                        {
+                            var alignStr = alignProp.GetString();
+                            if (alignStr != null)
+                            {
+                                switch (alignStr.ToLower())
+                                {
+                                    case "left": attr.Alignment = Alignment.Left; break;
+                                    case "right": attr.Alignment = Alignment.Right; break;
+                                    case "center": attr.Alignment = Alignment.Center; break;
+                                    case "justify": attr.Alignment = Alignment.Justify; break;
+                                }
+                            }
+                        }
+                        if (attrObj.TryGetProperty("font_color", out var fontColorProp))
+                        {
+                            var colorStr = fontColorProp.GetString();
+                            if (!string.IsNullOrEmpty(colorStr))
+                                attr.FontColor = new yuseok.kim.dw2docs.Common.DwObjects.DwColorWrapper { Value = System.Drawing.ColorTranslator.FromHtml(colorStr) };
+                        }
+                        if (attrObj.TryGetProperty("background_color", out var bgColorProp))
+                        {
+                            var colorStr = bgColorProp.GetString();
+                            if (!string.IsNullOrEmpty(colorStr))
+                                attr.BackgroundColor = new yuseok.kim.dw2docs.Common.DwObjects.DwColorWrapper { Value = System.Drawing.ColorTranslator.FromHtml(colorStr) };
+                        }
+                        attributes[cellAttr.Name] = attr;
+                    }
+                }
+                else
+                {
+                    // Fallback: create attributes from cell values
+                    foreach (var cellEntry in cellValues)
+                    {
+                        attributes[cellEntry.Key] = new DwTextAttributes
+                        {
+                            Text = cellEntry.Value,
+                            IsVisible = true
+                        };
+                    }
+                }
+
                 // Set attributes using reflection
-                var method = typeof(VirtualGrid).GetMethod("SetAttributes", 
-                    System.Reflection.BindingFlags.NonPublic | 
+                var method = typeof(VirtualGrid).GetMethod("SetAttributes",
+                    System.Reflection.BindingFlags.NonPublic |
                     System.Reflection.BindingFlags.Instance);
                 method?.Invoke(grid, new object[] { attributes });
 
@@ -258,7 +336,7 @@ namespace yuseok.kim.dw2docs.Interop
                 {
                     controlAttributesProp.SetValue(grid, attributes);
                 }
-                
+
                 return grid;
             }
             catch (Exception ex)

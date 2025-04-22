@@ -8,7 +8,25 @@ namespace yuseok.kim.dw2docs.test.Interop
     [TestClass]
     public class DatawindowExporterTests
     {
-        private const string SimpleJson = "{\n  \"rows\": [\n    { \"Name\": \"Alice\", \"Age\": \"30\" },\n    { \"Name\": \"Bob\", \"Age\": \"25\" }\n  ]\n}";
+        private const string SimpleJson = @"{
+  ""columns"": [
+    { ""name"": ""Name"", ""width"": 100, ""type"": ""char(20)"", ""format"": """" },
+    { ""name"": ""Age"", ""width"": 50, ""type"": ""int"", ""format"": """" }
+  ],
+  ""bands"": [
+    { ""name"": ""detail"" }
+  ],
+  ""rows"": [
+    { ""Name"": ""Alice"", ""Age"": ""30"" },
+    { ""Name"": ""Bob"", ""Age"": ""25"" }
+  ],
+  ""cell_attributes"": {
+    ""cell_0_0"": { ""text"": ""Alice"", ""is_visible"": true },
+    ""cell_0_1"": { ""text"": ""30"", ""is_visible"": true },
+    ""cell_1_0"": { ""text"": ""Bob"", ""is_visible"": true },
+    ""cell_1_1"": { ""text"": ""25"", ""is_visible"": true }
+  }
+}";
         private string? _testOutputDir;
 
         [TestInitialize]

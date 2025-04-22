@@ -44,7 +44,7 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers
             }
 
             shapeBase.LineStyle = lineAttribute.LineStyle.DwLineStyleToNpoiLineStyle();
-            shapeBase.SetLineStyleColor(lineAttribute.LineColor.Value.ToRgb());
+            shapeBase.LineStyleColor = lineAttribute.LineColor.Value.ToRgb();
             shapeBase.LineWidth = lineAttribute.LineWidth;
 
             return new yuseok.kim.dw2docs.Xlsx.Models.ExportedFloatingCell(cell, attribute)

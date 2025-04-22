@@ -9,6 +9,7 @@ using yuseok.kim.dw2docs.Common.VirtualGrid;
 using yuseok.kim.dw2docs.Common.VirtualGridWriter.Abstractions;
 using yuseok.kim.dw2docs.Docx.VirtualGridWriter.DocxWriter;
 using yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.XlsxWriter;
+using yuseok.kim.dw2docs.Common.Utils;
 
 namespace yuseok.kim.dw2docs.Interop
 {
@@ -145,11 +146,11 @@ namespace yuseok.kim.dw2docs.Interop
                 var controlAttributes = controlAttributesProp?.GetValue(grid) as IDictionary<string, object>;
                 if (controlAttributes != null)
                 {
-                    LogToFile("[ExportToWord] ControlAttributes keys: " + string.Join(", ", controlAttributes.Keys));
+                    FileLogger.LogToFile("[ExportToWord] ControlAttributes keys: " + string.Join(", ", controlAttributes.Keys));
                 }
                 else
                 {
-                    LogToFile("[ExportToWord] ControlAttributes is null");
+                    FileLogger.LogToFile("[ExportToWord] ControlAttributes is null");
                 }
 
                 return $"Success: Word file created at {outputPath}";
@@ -281,7 +282,7 @@ namespace yuseok.kim.dw2docs.Interop
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[CreateVirtualGridFromJson] Error: {ex.Message}\n{ex.StackTrace}");
+                FileLogger.LogToFile($"[CreateVirtualGridFromJson] Error: {ex.Message}\n{ex.StackTrace}", ex);
                 throw; // rethrow so ExportToExcel can catch it
             }
         }
@@ -359,25 +360,6 @@ namespace yuseok.kim.dw2docs.Interop
                 cellsByY,
                 cells
             });
-        }
-        private const string LogFilePath = @"C:\temp\Dw2Doc_ExcelError.log";
-
-        private static void LogToFile(string message, Exception? ex = null)
-        {
-            try
-            {
-                string logContent = $"[{DateTime.Now}] {message}";
-                if (ex != null)
-                {
-                    logContent += $"\nException Type: {ex.GetType().FullName}\nMessage: {ex.Message}\nStackTrace:\n{ex.StackTrace}";
-                }
-                logContent += "\n---------------------------------\n";
-                File.AppendAllText(LogFilePath, logContent);
-            }
-            catch (Exception logEx)
-            {
-                Console.WriteLine($"!!! Failed to write to log file {LogFilePath}: {logEx.Message}");
-            }
         }
     }
 } 

@@ -14,7 +14,25 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers.Xlsx
     internal class XlsxTextRenderer : AbstractXlsxRenderer
     {
         private const double TextBoxWidthAdjustment = 5;
+        private const string LogFilePath = @"C:\temp\Dw2Doc_ExcelError.log";
 
+        private static void LogToFile(string message, Exception? ex = null)
+        {
+            try
+            {
+                string logContent = $"[{DateTime.Now}] {message}";
+                if (ex != null)
+                {
+                    logContent += $"\nException Type: {ex.GetType().FullName}\nMessage: {ex.Message}\nStackTrace:\n{ex.StackTrace}";
+                }
+                logContent += "\n---------------------------------\n";
+                File.AppendAllText(LogFilePath, logContent);
+            }
+            catch (Exception logEx)
+            {
+                Console.WriteLine($"!!! Failed to write to log file {LogFilePath}: {logEx.Message}");
+            }
+        }
         private static double ConvertFontSize(DwTextAttributes attributes)
         {
             return attributes.FontSize - 1;
@@ -89,10 +107,15 @@ namespace yuseok.kim.dw2docs.Xlsx.VirtualGridWriter.Renderers.Xlsx
                 textAttribute.DataType is Common.Enums.DataType.Number) &&
                 !string.IsNullOrEmpty(textAttribute.RawText))
             {
-                renderTarget.SetCellValue(double.Parse(textAttribute.RawText));
+                double value = double.Parse(textAttribute.RawText);
+                LogToFile($"[XlsxTextRenderer] Setting numeric cell value at row {renderTarget.Row.RowNum}, col {renderTarget.ColumnIndex}: {value}");
+                renderTarget.SetCellValue(value);
             }
             else
+            {
+                LogToFile($"[XlsxTextRenderer] Setting text cell value at row {renderTarget.Row.RowNum}, col {renderTarget.ColumnIndex}: '{textAttribute.Text}'");
                 renderTarget.SetCellValue(textAttribute.Text);
+            }
 
             return new yuseok.kim.dw2docs.Xlsx.Models.ExportedCell(cell, attribute)
             {

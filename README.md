@@ -22,6 +22,18 @@ This project inspired from Appeon's [Dw2Doc example Project](https://github.com/
 4. **Dotnet Foundation and Microsoft**
 5. **[PolySharp](https://github.com/Sergio0694/PolySharp)**
 
+## NOTICE
+
+This project is a substantial refactoring and extension of Appeon's Dw2Doc example project ([MIT License](https://github.com/Appeon/PowerBuilder-Dw2Doc-Example)).
+
+Major changes include:
+- Migration from .NET 6 to .NET 8
+- Merging multiple projects into a single DLL
+- Upgrading NPOI and adding PolySharp for compatibility with .NET 481
+- Architectural and codebase restructuring for production use
+
+Original project: https://github.com/Appeon/PowerBuilder-Dw2Doc-Example
+
 ## Setup Instructions
 
 ### Building the .NET Library

@@ -45,7 +45,7 @@ namespace yuseok.kim.dw2docs
                     WriteToPath = outputPath
                 };
 
-                // TODO: Add validation for builder creation failure
+                
                 var writer = builder.Build(grid, out string? error);
                 if (writer == null)
                 {

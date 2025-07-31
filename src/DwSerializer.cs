@@ -75,7 +75,6 @@ namespace yuseok.kim.dw2docs
                 }
                 finally
                 {
-                    // TODO: Add proper disposal pattern for writer resources
                     if (writer is IDisposable disposable)
                     {
                         disposable.Dispose();

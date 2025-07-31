@@ -21,7 +21,6 @@ namespace yuseok.kim.dw2docs
         {
             try
             {
-                // TODO: Add validation for grid parameter - null check needed
                 if (grid == null)
                 {
                     return "Error: Virtual grid cannot be null";

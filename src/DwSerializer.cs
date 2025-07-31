@@ -26,7 +26,7 @@ namespace yuseok.kim.dw2docs
                     return "Error: Virtual grid cannot be null";
                 }
 
-                // TODO: Add validation for outputPath - check directory exists and is writable
+                
                 if (string.IsNullOrWhiteSpace(outputPath))
                 {
                     return "Error: Output path cannot be null or empty";

@@ -65,7 +65,6 @@ namespace yuseok.kim.dw2docs
                         return $"Error: {error}";
                     }
 
-                    // TODO: Add file validation - verify the created file is valid DOCX
                     if (!File.Exists(outputPath))
                     {
                         return "Error: DOCX file was not created successfully";

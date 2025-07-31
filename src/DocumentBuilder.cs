@@ -66,7 +66,7 @@ namespace yuseok.kim.dw2docs
                     throw new ArgumentException("Output path cannot be null or empty", nameof(outputPath));
                 }
 
-                // Added validation for directory accessibility
+                
                 var directory = Path.GetDirectoryName(outputPath);
                 if (!string.IsNullOrEmpty(directory))
                 {

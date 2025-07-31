@@ -30,7 +30,7 @@ namespace yuseok.kim.dw2docs
         {
             try
             {
-                // Added null check to prevent NullReferenceException
+                
                 if (grid == null)
                 {
                     throw new ArgumentNullException(nameof(grid), "Virtual grid cannot be null");

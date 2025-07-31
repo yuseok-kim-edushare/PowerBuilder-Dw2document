@@ -47,7 +47,6 @@ namespace yuseok.kim.dw2docs
             }
             catch (Exception ex)
             {
-                // Added exception logging for debugging
                 FileLogger.LogToFile($"[DocumentBuilder.WithGrid] Error setting grid: {ex.Message}", ex);
                 throw; // Re-throw to maintain original behavior
             }

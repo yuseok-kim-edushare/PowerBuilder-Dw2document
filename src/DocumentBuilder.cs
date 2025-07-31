@@ -61,7 +61,6 @@ namespace yuseok.kim.dw2docs
         {
             try
             {
-                // Added null check for output path
                 if (string.IsNullOrWhiteSpace(outputPath))
                 {
                     throw new ArgumentException("Output path cannot be null or empty", nameof(outputPath));

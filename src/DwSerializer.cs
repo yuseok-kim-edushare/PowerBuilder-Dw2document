@@ -32,7 +32,7 @@ namespace yuseok.kim.dw2docs
                     return "Error: Output path cannot be null or empty";
                 }
 
-                // TODO: Ensure output directory exists
+                
                 var directory = Path.GetDirectoryName(outputPath);
                 if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                 {

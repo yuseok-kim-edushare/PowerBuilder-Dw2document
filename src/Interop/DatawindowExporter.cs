@@ -258,6 +258,38 @@ namespace yuseok.kim.dw2docs.Interop
                 // --- Create the VirtualGrid ---
                 var grid = new VirtualGrid(rows, columns, bands, cellRepo, DwType.Default);
 
+                // --- Parse objects (optional) ---
+                var visualObjects = new List<IDwObject>();
+                if (root.TryGetProperty("objects", out var objectsElement))
+                {
+                    foreach (var objElement in objectsElement.EnumerateArray())
+                    {
+                        var objName = objElement.TryGetProperty("name", out var nameProp) ? nameProp.GetString() ?? "" : "";
+                        var objType = objElement.TryGetProperty("type", out var typeProp) ? typeProp.GetString() ?? "" : "";
+                        
+                        switch (objType.ToLower())
+                        {
+                            case "text":
+                                var textObj = new DwText(objName);
+                                ParseTextAttributes(objElement, textObj.Attributes);
+                                visualObjects.Add(textObj);
+                                break;
+                                
+                            case "line":
+                                var lineObj = new DwLine(objName);
+                                ParseLineAttributes(objElement, lineObj.Attributes);
+                                visualObjects.Add(lineObj);
+                                break;
+                                
+                            case "compute":
+                                var computeObj = new DwCompute(objName);
+                                ParseComputeAttributes(objElement, computeObj.Attributes);
+                                visualObjects.Add(computeObj);
+                                break;
+                        }
+                    }
+                }
+
                 // --- Parse cell_attributes (optional) ---
                 var attributes = new Dictionary<string, DwObjectAttributesBase>();
                 if (root.TryGetProperty("cell_attributes", out var cellAttrsElement))
@@ -419,6 +451,169 @@ namespace yuseok.kim.dw2docs.Interop
                 cellsByY,
                 cells
             });
+        }
+
+        /// <summary>
+        /// Parse text object attributes from JSON
+        /// </summary>
+        private void ParseTextAttributes(JsonElement objElement, DwTextAttributes attributes)
+        {
+            // Position and size
+            if (objElement.TryGetProperty("x", out var xProp) && xProp.TryGetInt32(out int x))
+                attributes.X = x;
+            if (objElement.TryGetProperty("y", out var yProp) && yProp.TryGetInt32(out int y))
+                attributes.Y = y;
+            if (objElement.TryGetProperty("width", out var wProp) && wProp.TryGetInt32(out int width))
+                attributes.Width = width;
+            if (objElement.TryGetProperty("height", out var hProp) && hProp.TryGetInt32(out int height))
+                attributes.Height = height;
+            if (objElement.TryGetProperty("band", out var bandProp))
+                attributes.Band = bandProp.GetString();
+
+            // Text attributes
+            if (objElement.TryGetProperty("text", out var textProp))
+                attributes.Text = textProp.GetString();
+            if (objElement.TryGetProperty("alignment", out var alignProp))
+            {
+                var alignStr = alignProp.GetString()?.ToLower();
+                switch (alignStr)
+                {
+                    case "left": attributes.Alignment = Alignment.Left; break;
+                    case "right": attributes.Alignment = Alignment.Right; break;
+                    case "center": attributes.Alignment = Alignment.Center; break;
+                    case "justify": attributes.Alignment = Alignment.Justify; break;
+                }
+            }
+
+            // Font attributes
+            if (objElement.TryGetProperty("font_face", out var fontProp))
+                attributes.FontFace = fontProp.GetString();
+            if (objElement.TryGetProperty("font_height", out var fontSizeProp) && fontSizeProp.TryGetByte(out byte fontSize))
+                attributes.FontSize = fontSize;
+            if (objElement.TryGetProperty("font_weight", out var fontWeightProp) && fontWeightProp.TryGetInt16(out short fontWeight))
+                attributes.FontWeight = fontWeight;
+            if (objElement.TryGetProperty("underline", out var underlineProp))
+                attributes.Underline = underlineProp.GetString() == "1" || underlineProp.GetString()?.ToLower() == "true";
+            if (objElement.TryGetProperty("italic", out var italicProp))
+                attributes.Italics = italicProp.GetString() == "1" || italicProp.GetString()?.ToLower() == "true";
+            if (objElement.TryGetProperty("strikethrough", out var strikeProp))
+                attributes.Strikethrough = strikeProp.GetString() == "1" || strikeProp.GetString()?.ToLower() == "true";
+
+            // Color attributes
+            ParseColorProperty(objElement, "color", val => attributes.FontColor = val);
+            ParseColorProperty(objElement, "background_color", val => attributes.BackgroundColor = val);
+        }
+
+        /// <summary>
+        /// Parse line object attributes from JSON
+        /// </summary>
+        private void ParseLineAttributes(JsonElement objElement, DwLineAttributes attributes)
+        {
+            // Position attributes
+            if (objElement.TryGetProperty("band", out var bandProp))
+                attributes.Band = bandProp.GetString();
+
+            // Line coordinates
+            int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+            if (objElement.TryGetProperty("x1", out var x1Prop) && x1Prop.TryGetInt32(out x1))
+                attributes.SetStart(x1, y1);
+            if (objElement.TryGetProperty("y1", out var y1Prop) && y1Prop.TryGetInt32(out y1))
+                attributes.SetStart(x1, y1);
+            if (objElement.TryGetProperty("x2", out var x2Prop) && x2Prop.TryGetInt32(out x2))
+                attributes.SetEnd(x2, y2);
+            if (objElement.TryGetProperty("y2", out var y2Prop) && y2Prop.TryGetInt32(out y2))
+                attributes.SetEnd(x2, y2);
+
+            // Line style attributes
+            if (objElement.TryGetProperty("pen_width", out var widthProp) && widthProp.TryGetUInt16(out ushort width))
+                attributes.LineWidth = width;
+
+            // Line color
+            ParseColorProperty(objElement, "pen_color", val => attributes.LineColor = val);
+
+            // Line style (optional - default to solid)
+            attributes.LineStyle = LineStyle.Solid;
+        }
+
+        /// <summary>
+        /// Parse compute object attributes from JSON
+        /// </summary>
+        private void ParseComputeAttributes(JsonElement objElement, DwComputeAttributes attributes)
+        {
+            // Position and size
+            if (objElement.TryGetProperty("x", out var xProp) && xProp.TryGetInt32(out int x))
+                attributes.X = x;
+            if (objElement.TryGetProperty("y", out var yProp) && yProp.TryGetInt32(out int y))
+                attributes.Y = y;
+            if (objElement.TryGetProperty("width", out var wProp) && wProp.TryGetInt32(out int width))
+                attributes.Width = width;
+            if (objElement.TryGetProperty("height", out var hProp) && hProp.TryGetInt32(out int height))
+                attributes.Height = height;
+            if (objElement.TryGetProperty("band", out var bandProp))
+                attributes.Band = bandProp.GetString();
+
+            // Compute-specific attributes
+            if (objElement.TryGetProperty("expression", out var exprProp))
+                attributes.Expression = exprProp.GetString();
+            if (objElement.TryGetProperty("format", out var formatProp))
+                attributes.FormatString = formatProp.GetString();
+
+            // Text formatting attributes (similar to text objects)
+            if (objElement.TryGetProperty("alignment", out var alignProp))
+            {
+                var alignStr = alignProp.GetString()?.ToLower();
+                switch (alignStr)
+                {
+                    case "left": attributes.Alignment = Alignment.Left; break;
+                    case "right": attributes.Alignment = Alignment.Right; break;
+                    case "center": attributes.Alignment = Alignment.Center; break;
+                    case "justify": attributes.Alignment = Alignment.Justify; break;
+                }
+            }
+
+            // Font attributes
+            if (objElement.TryGetProperty("font_face", out var fontProp))
+                attributes.FontFace = fontProp.GetString();
+            if (objElement.TryGetProperty("font_height", out var fontSizeProp) && fontSizeProp.TryGetByte(out byte fontSize))
+                attributes.FontSize = fontSize;
+            if (objElement.TryGetProperty("font_weight", out var fontWeightProp) && fontWeightProp.TryGetInt16(out short fontWeight))
+                attributes.FontWeight = fontWeight;
+
+            // Color attributes
+            ParseColorProperty(objElement, "color", val => attributes.FontColor = val);
+            ParseColorProperty(objElement, "background_color", val => attributes.BackgroundColor = val);
+        }
+
+        /// <summary>
+        /// Helper method to parse color properties from JSON
+        /// </summary>
+        private void ParseColorProperty(JsonElement objElement, string propertyName, Action<DwColorWrapper> setValue)
+        {
+            if (objElement.TryGetProperty(propertyName, out var colorProp))
+            {
+                if (colorProp.TryGetInt64(out long colorValue))
+                {
+                    // PowerBuilder color format (RGB as long)
+                    var color = System.Drawing.Color.FromArgb((int)(colorValue & 0xFFFFFF));
+                    setValue(new DwColorWrapper { Value = color });
+                }
+                else if (colorProp.ValueKind == JsonValueKind.String)
+                {
+                    var colorStr = colorProp.GetString();
+                    if (!string.IsNullOrEmpty(colorStr))
+                    {
+                        try
+                        {
+                            var color = System.Drawing.ColorTranslator.FromHtml(colorStr);
+                            setValue(new DwColorWrapper { Value = color });
+                        }
+                        catch
+                        {
+                            // Ignore invalid color values
+                        }
+                    }
+                }
+            }
         }
     }
 } 

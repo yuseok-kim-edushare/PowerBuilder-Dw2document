@@ -189,21 +189,76 @@ do while li_pos_start > 0
     ls_objs += "{"
     ls_objs += '"name":"' + json_escape(ls_objname) + '",'
     ls_objs += '"type":"' + json_escape(ls_type) + '"'
+    
     // Add position/size if available
-    string ls_x, ls_y, ls_w, ls_h
+    string ls_x, ls_y, ls_w, ls_h, ls_band
     ls_x = adw_source.Describe(ls_objname + ".X")
     ls_y = adw_source.Describe(ls_objname + ".Y")
     ls_w = adw_source.Describe(ls_objname + ".Width")
     ls_h = adw_source.Describe(ls_objname + ".Height")
+    ls_band = adw_source.Describe(ls_objname + ".Band")
+    
     ls_objs += ',"x":' + json_null_if_special(ls_x)
     ls_objs += ',"y":' + json_null_if_special(ls_y)
     ls_objs += ',"width":' + json_null_if_special(ls_w)
     ls_objs += ',"height":' + json_null_if_special(ls_h)
-    // Add font/color if available
-    ls_objs += ',"font_face":' + json_null_if_special(adw_source.Describe(ls_objname + ".Font.Face")) + '"'
-    ls_objs += ',"font_height":' + json_null_if_special(adw_source.Describe(ls_objname + ".Font.Height")) + '"'
-    ls_objs += ',"color":' + json_null_if_special(adw_source.Describe(ls_objname + ".Color")) + '"'
-    ls_objs += ',"background_color":' + json_null_if_special(adw_source.Describe(ls_objname + ".Background.Color")) + '"'
+    ls_objs += ',"band":"' + json_escape(ls_band) + '"'
+    
+    // Type-specific attributes
+    choose case ls_type
+        case "text"
+            // Text object attributes
+            ls_objs += ',"text":"' + json_escape(adw_source.Describe(ls_objname + ".Text")) + '"'
+            ls_objs += ',"alignment":"' + json_escape(adw_source.Describe(ls_objname + ".Alignment")) + '"'
+            ls_objs += ',"font_face":"' + json_escape(adw_source.Describe(ls_objname + ".Font.Face")) + '"'
+            ls_objs += ',"font_height":' + json_null_if_special(adw_source.Describe(ls_objname + ".Font.Height"))
+            ls_objs += ',"font_weight":' + json_null_if_special(adw_source.Describe(ls_objname + ".Font.Weight"))
+            ls_objs += ',"underline":"' + json_escape(adw_source.Describe(ls_objname + ".Font.Underline")) + '"'
+            ls_objs += ',"italic":"' + json_escape(adw_source.Describe(ls_objname + ".Font.Italic")) + '"'
+            ls_objs += ',"strikethrough":"' + json_escape(adw_source.Describe(ls_objname + ".Font.Strikethrough")) + '"'
+            ls_objs += ',"color":' + json_null_if_special(adw_source.Describe(ls_objname + ".Color"))
+            ls_objs += ',"background_color":' + json_null_if_special(adw_source.Describe(ls_objname + ".Background.Color"))
+            
+        case "line"
+            // Line object attributes
+            ls_objs += ',"x1":' + json_null_if_special(adw_source.Describe(ls_objname + ".X1"))
+            ls_objs += ',"y1":' + json_null_if_special(adw_source.Describe(ls_objname + ".Y1"))
+            ls_objs += ',"x2":' + json_null_if_special(adw_source.Describe(ls_objname + ".X2"))
+            ls_objs += ',"y2":' + json_null_if_special(adw_source.Describe(ls_objname + ".Y2"))
+            ls_objs += ',"pen_width":' + json_null_if_special(adw_source.Describe(ls_objname + ".Pen.Width"))
+            ls_objs += ',"pen_color":' + json_null_if_special(adw_source.Describe(ls_objname + ".Pen.Color"))
+            ls_objs += ',"pen_style":"' + json_escape(adw_source.Describe(ls_objname + ".Pen.Style")) + '"'
+            
+        case "compute"
+            // Compute object attributes
+            ls_objs += ',"expression":"' + json_escape(adw_source.Describe(ls_objname + ".Expression")) + '"'
+            ls_objs += ',"format":"' + json_escape(adw_source.Describe(ls_objname + ".Format")) + '"'
+            ls_objs += ',"alignment":"' + json_escape(adw_source.Describe(ls_objname + ".Alignment")) + '"'
+            ls_objs += ',"font_face":"' + json_escape(adw_source.Describe(ls_objname + ".Font.Face")) + '"'
+            ls_objs += ',"font_height":' + json_null_if_special(adw_source.Describe(ls_objname + ".Font.Height"))
+            ls_objs += ',"font_weight":' + json_null_if_special(adw_source.Describe(ls_objname + ".Font.Weight"))
+            ls_objs += ',"color":' + json_null_if_special(adw_source.Describe(ls_objname + ".Color"))
+            ls_objs += ',"background_color":' + json_null_if_special(adw_source.Describe(ls_objname + ".Background.Color"))
+            
+        case "column"
+            // Column object attributes  
+            ls_objs += ',"col_type":"' + json_escape(adw_source.Describe(ls_objname + ".ColType")) + '"'
+            ls_objs += ',"format":"' + json_escape(adw_source.Describe(ls_objname + ".Format")) + '"'
+            ls_objs += ',"alignment":"' + json_escape(adw_source.Describe(ls_objname + ".Alignment")) + '"'
+            ls_objs += ',"font_face":"' + json_escape(adw_source.Describe(ls_objname + ".Font.Face")) + '"'
+            ls_objs += ',"font_height":' + json_null_if_special(adw_source.Describe(ls_objname + ".Font.Height"))
+            ls_objs += ',"font_weight":' + json_null_if_special(adw_source.Describe(ls_objname + ".Font.Weight"))
+            ls_objs += ',"color":' + json_null_if_special(adw_source.Describe(ls_objname + ".Color"))
+            ls_objs += ',"background_color":' + json_null_if_special(adw_source.Describe(ls_objname + ".Background.Color"))
+            
+        case else
+            // Basic attributes for other object types
+            ls_objs += ',"font_face":"' + json_escape(adw_source.Describe(ls_objname + ".Font.Face")) + '"'
+            ls_objs += ',"font_height":' + json_null_if_special(adw_source.Describe(ls_objname + ".Font.Height"))
+            ls_objs += ',"color":' + json_null_if_special(adw_source.Describe(ls_objname + ".Color"))
+            ls_objs += ',"background_color":' + json_null_if_special(adw_source.Describe(ls_objname + ".Background.Color"))
+    end choose
+    
     ls_objs += "}"
     li_objcount++
 loop

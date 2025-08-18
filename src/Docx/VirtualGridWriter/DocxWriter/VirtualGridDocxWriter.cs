@@ -44,6 +44,8 @@ namespace yuseok.kim.dw2docs.Docx.VirtualGridWriter.DocxWriter
         {
             // Register renderers for different attribute types
             _rendererLocator.RegisterRenderer(typeof(DwTextAttributes), new DocxTextRenderer(_context));
+            _rendererLocator.RegisterRenderer(typeof(DwLineAttributes), new DocxLineRenderer(_context));
+            _rendererLocator.RegisterRenderer(typeof(DwComputeAttributes), new DocxComputeRenderer(_context));
             
             // TODO: Register other renderers as they are implemented
         }

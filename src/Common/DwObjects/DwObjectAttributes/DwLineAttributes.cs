@@ -10,6 +10,7 @@ namespace yuseok.kim.dw2docs.Common.DwObjects.DwObjectAttributes
         public ushort LineWidth { get; set; }
         public DwColorWrapper LineColor { get; set; } = new DwColorWrapper();
         public LineStyle LineStyle { get; set; }
+        public string? Band { get; set; }
 
         public void SetStart(int x, int y)
         {
@@ -32,7 +33,8 @@ namespace yuseok.kim.dw2docs.Common.DwObjects.DwObjectAttributes
                 && End == other.End
                 && LineWidth == other.LineWidth
                 && LineColor.Equals(other.LineColor)
-                && LineStyle == other.LineStyle;
+                && LineStyle == other.LineStyle
+                && Band == other.Band;
         }
 
         // override object.GetHashCode
@@ -44,6 +46,7 @@ namespace yuseok.kim.dw2docs.Common.DwObjects.DwObjectAttributes
             hash = hash * 31 + LineWidth.GetHashCode();
             hash = hash * 31 + LineColor.GetHashCode();
             hash = hash * 31 + (int)LineStyle;
+            hash = hash * 31 + (Band?.GetHashCode() ?? 0);
             return hash;
         }
     }
